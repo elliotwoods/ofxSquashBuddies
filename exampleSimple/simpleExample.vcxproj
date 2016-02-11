@@ -179,23 +179,16 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\ofxAsio\src\ofxAsio\UDP\DataGram.cpp" />
-    <ClCompile Include="..\..\ofxAsio\src\ofxAsio\UDP\EndPoint.cpp" />
-    <ClCompile Include="..\..\ofxAsio\src\ofxAsio\UDP\Socket.cpp" />
+    <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio.h" />
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\Includes.h" />
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\Client.h" />
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\DataGram.h" />
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\EndPoint.h" />
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\Server.h" />
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\Socket.h" />
     <ClInclude Include="..\src\ofxSquashBuddies.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\Constants.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\Packet.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Sender.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h" />

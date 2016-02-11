@@ -8,19 +8,13 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp">
-      <Filter>addons\ofxSquashAndSend\src\ofxSquashBuddies</Filter>
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp">
-      <Filter>addons\ofxSquashAndSend\src\ofxSquashBuddies</Filter>
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\ofxAsio\src\ofxAsio\UDP\DataGram.cpp">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\ofxAsio\src\ofxAsio\UDP\EndPoint.cpp">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\ofxAsio\src\ofxAsio\UDP\Socket.cpp">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
+    <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -30,29 +24,14 @@
     <Filter Include="addons">
       <UniqueIdentifier>{79825aa4-020b-4150-aee7-56bd2fffc038}</UniqueIdentifier>
     </Filter>
-    <Filter Include="addons\ofxSquashAndSend">
+    <Filter Include="addons\ofxSquashBuddies">
       <UniqueIdentifier>{c7e6f826-7cd8-4885-8c03-faeb475e7818}</UniqueIdentifier>
     </Filter>
-    <Filter Include="addons\ofxSquashAndSend\src">
+    <Filter Include="addons\ofxSquashBuddies\src">
       <UniqueIdentifier>{1493368f-5779-4061-be23-8a81c8ed2d02}</UniqueIdentifier>
     </Filter>
-    <Filter Include="addons\ofxSquashAndSend\src\ofxSquashBuddies">
+    <Filter Include="addons\ofxSquashBuddies\src\ofxSquashBuddies">
       <UniqueIdentifier>{283f1e32-ab6f-42a2-9c31-579326e74458}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="addons\ofxAsio">
-      <UniqueIdentifier>{97dd3eab-fa40-4e43-89ab-701090077b44}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="addons\ofxAsio\src">
-      <UniqueIdentifier>{fdacb879-75d5-4baa-b192-2017685935cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="addons\ofxAsio\src\ofxAsio">
-      <UniqueIdentifier>{f4dd099e-b0ec-4500-8d55-b3702b66d728}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="addons\ofxAsio\src\ofxAsio\UDP">
-      <UniqueIdentifier>{d2d7b090-0156-48d3-8574-cfb7c667c0e4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="addons\ofxAsio\libs">
-      <UniqueIdentifier>{4df5f022-a820-4b98-84b1-7e28fa2d189e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -60,37 +39,22 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxSquashBuddies.h">
-      <Filter>addons\ofxSquashAndSend\src</Filter>
+      <Filter>addons\ofxSquashBuddies\src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h">
-      <Filter>addons\ofxSquashAndSend\src\ofxSquashBuddies</Filter>
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxSquashBuddies\Sender.h">
-      <Filter>addons\ofxSquashAndSend\src\ofxSquashBuddies</Filter>
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h">
-      <Filter>addons\ofxSquashAndSend\src\ofxSquashBuddies</Filter>
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\Client.h">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
+    <ClInclude Include="..\src\ofxSquashBuddies\Constants.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\DataGram.h">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\EndPoint.h">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\Server.h">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\UDP\Socket.h">
-      <Filter>addons\ofxAsio\src\ofxAsio\UDP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio\Includes.h">
-      <Filter>addons\ofxAsio\src\ofxAsio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ofxAsio\src\ofxAsio.h">
-      <Filter>addons\ofxAsio\src\ofxAsio</Filter>
+    <ClInclude Include="..\src\ofxSquashBuddies\Packet.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -22,9 +22,9 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-		ofxSquashBuddies::Sender<ofPixels> sender;
-		ofxSquashBuddies::Receiver<ofPixels> receiver;
+		ofxSquashBuddies::Sender sender;
+		ofxSquashBuddies::Receiver receiver;
 
 		ofVideoGrabber video;
-		ofImage received;
+		ofImage receivedPreview;
 };

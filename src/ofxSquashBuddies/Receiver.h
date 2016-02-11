@@ -2,26 +2,29 @@
 
 #include "ThingsInCommon.h"
 
+#include "ofEvent.h"
+
 namespace ofxSquashBuddies {
-	template<typename Type>
 	class Receiver {
 	public:
 		struct ReceiveArguments {
-			Type data;
+
 		};
 
-		void init(int port);
+		void init(int port) { }
 
-		void update();
-		bool isFrameNew() const;
+		void update() { }
+		bool isFrameNew() const { return false;  }
+		bool isFrameIncoming() const { return false;  }
 
-		bool receive(Type &);
-		bool receiveNext(Type &, const chrono::duration & timeOut);
+		template<typename Type>
+		bool receive(Type &) { return false;  }
 
-		// WARNING :Tthis will happen outside of the main thread
+		template<typename Type>
+		bool receiveNext(Type &, const chrono::milliseconds & timeOut) { return false;  }
+
+		// WARNING : This event will fire outside of the main thread
 		ofEvent<ReceiveArguments> onReceive;
 	protected:
-		conditional_variable receiveWaiter;
-		mutex mutex;
 	};
 }

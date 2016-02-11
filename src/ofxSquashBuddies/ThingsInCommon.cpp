@@ -12,7 +12,7 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	const ofxSquash::Codec & ThingsInCommon::getCodec() cosnt {
+	const ofxSquash::Codec & ThingsInCommon::getCodec() const {
 		return this->codec;
 	}
 }

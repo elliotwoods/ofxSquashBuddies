@@ -2,21 +2,44 @@
 
 #include "ThingsInCommon.h"
 
+#include "ofThreadChannel.h"
+#include "ofPixels.h"
+#include "ofMesh.h"
+
+#include <condition_variable>
+
 namespace ofxSquashBuddies {
-	template<typename Type>
-	class Sender {
+	class Sender : public ThingsInCommon {
 	public:
 		~Sender();
-		void init(string address, int port);
+		void init(string ipAddress, int port);
 		void close();
 
-		void send(Type &);
+		void send(const void * data, size_t size);
+		void send(const string &);
+		void send(const ofPixels &);
+
+		template<typename PodType, typename std::enable_if<std::is_pod<PodType>::value, void>::type>
+		void send(PodType & data) {
+			this->send(&data, sizeof(PodType));
+		}
+
 	protected:
-		void threadedFunction();
+		void compressLoop();
+		void socketLoop();
 
-		bool threadRunning = false;
-		thread sendThread;
+		bool threadsRunning = false;
+		thread compressThread;
+		thread socketThread;
 
-		shared_ptr<ofxAsio::UDP::Socket> socket;
+		shared_ptr<ofxAsio::UDP::Client> socket;
+
+		shared_ptr<ofThreadChannel<string>> appToCompressor;
+		shared_ptr<ofThreadChannel<Packet>> compressorToSocket;
+
+		struct {
+			ofxAsio::UDP::EndPoint endPoint;
+		} config;
+		mutex configMutex;
 	};
 }

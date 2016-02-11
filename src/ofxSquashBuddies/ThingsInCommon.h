@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Constants.h"
+#include "Packet.h"
+
 #include "ofxSquash/Codec.h"
 #include "ofxSquash/Stream.h"
 
