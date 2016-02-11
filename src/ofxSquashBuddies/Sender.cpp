@@ -99,30 +99,32 @@ namespace ofxSquashBuddies {
 			string message;
 			if (this->appToCompressor->receive(message)) {
 				Packet packet;
-
-				packet.frameIndex = frameIndex++;
+				packet.frameIndex = frameIndex;
 
 				struct {
 					size_t offset = 0;
 					size_t availableBytes = Packet::MaxPayloadSize;
 				} payloadState;
 
-				ofxSquash::Stream compressStream(this->getCodec(), ofxSquash::Direction::Compress, [this, &packet, &payloadState](const uint8_t * data, size_t size) {
+				ofxSquash::Stream compressStream(this->getCodec(), ofxSquash::Direction::Compress, [this, &packet, &payloadState](const ofxSquash::WriteFunctionArguments & args) {
+					//copy incoming data and split into packets
+
 					struct {
 						uint8_t * readPosition;
 						size_t availableBytes;
 					} inputState;
-					inputState.readPosition = (uint8_t*)data;
-					inputState.availableBytes = size;
+					inputState.readPosition = (uint8_t*)args.data;
+					inputState.availableBytes = args.size;
 
 					while (inputState.availableBytes > 0) {
-						auto bytesToCopy = min<size_t>(size, payloadState.availableBytes);
-						memcpy(packet.payload + payloadState.offset, inputState.readPosition, bytesToCopy);
+						auto bytesToCopy = min<size_t>(inputState.availableBytes, payloadState.availableBytes);
 
-						payloadState.offset += bytesToCopy;
-						payloadState.availableBytes -= bytesToCopy;
+						memcpy(packet.payload + payloadState.offset, inputState.readPosition, bytesToCopy);
+						
 						inputState.readPosition += bytesToCopy;
 						inputState.availableBytes -= bytesToCopy;
+						payloadState.offset += bytesToCopy;
+						payloadState.availableBytes -= bytesToCopy;
 
 						if (payloadState.availableBytes == 0) {
 							//finish off the packet header and send whenever we have a full packet
@@ -139,16 +141,17 @@ namespace ofxSquashBuddies {
 							}
 						}
 					}
-				}, Packet::MaxPayloadSize);
+				});
 
-				compressStream << message;
-				compressStream << ofxSquash::Stream::Finish();
+				compressStream << message << ofxSquash::Stream::Finish();
 
 				//if there's anything left over, then send it
 				if (payloadState.offset > 0) {
 					packet.payloadSize = payloadState.offset;
 					this->compressorToSocket->send(packet);
 				}
+
+				frameIndex++;
 			}
 		}
 	}

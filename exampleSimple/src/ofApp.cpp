@@ -4,6 +4,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+	ofSetFrameRate(60.0f);
+
 	auto codecs = ofxSquash::getCodecList();
 
 	this->video.initGrabber(640, 480);
