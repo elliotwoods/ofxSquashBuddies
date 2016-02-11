@@ -19,18 +19,18 @@ namespace ofxSquashBuddies {
 
 	namespace Header {
 		struct Raw {
-			const MessageType raw = MessageType::Raw;
+			MessageType messageType = MessageType::Raw;
 		};
 
 		struct Pixels {
-			const MessageType raw = MessageType::Pixels;
+			MessageType messageType = MessageType::Pixels;
 			uint16_t width;
 			uint16_t height;
 			ofPixelFormat format;
 		};
 
 		struct Mesh {
-
+			MessageType messageType = MessageType::Mesh;
 		};
 	}
 }

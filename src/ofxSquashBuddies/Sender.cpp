@@ -54,13 +54,25 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	void Sender::send(const void * data, size_t size) {
-		if (size == 0) {
-			OFXSQUASHBUDDIES_WARNING << "Cannot send an empty message";
-			return;
+	void Sender::send(const void * payload, size_t payloadSize) {
+		string data;
+
+		//write the message
+		{
+			const auto headerSize = sizeof(Header::Raw);
+			auto messageSize = headerSize + payloadSize;
+
+			data.resize(messageSize);
+
+			auto & header = *static_cast<Header::Raw *>((void*)data.data());
+			header = Header::Raw();
+
+			if (payloadSize > 0) {
+				memcpy(&data[0] + headerSize, payload, payloadSize);
+			}
 		}
 
-		this->appToCompressor->send(string((const char *)data, size));
+		this->appToCompressor->send(data);
 	}
 
 	//----------
@@ -81,12 +93,15 @@ namespace ofxSquashBuddies {
 			data.resize(messageSize);
 
 			auto & header = *static_cast<Header::Pixels *>((void*)data.data());
+			header = Header::Pixels();
 
 			header.width = pixels.getWidth();
 			header.height = pixels.getHeight();
 			header.format = pixels.getPixelFormat();
 
-			memcpy(&data[0] + headerSize, pixels.getData(), payloadSize);
+			if (payloadSize > 0) {
+				memcpy(&data[0] + headerSize, pixels.getData(), payloadSize);
+			}
 		}
 
 		this->send(data);

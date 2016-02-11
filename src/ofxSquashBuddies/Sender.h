@@ -15,7 +15,7 @@ namespace ofxSquashBuddies {
 		void init(string ipAddress, int port);
 		void close();
 
-		void send(const void * data, size_t size);
+		void send(const void * payload, size_t payloadSize);
 		void send(const string &);
 		void send(const ofPixels &);
 
