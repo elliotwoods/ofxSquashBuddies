@@ -1,0 +1,40 @@
+*.depend
+*.layout
+*.mode*v3
+*.pbxuser
+*.app*
+*.DS_*
+._*.*
+
+# Ignore bin folder
+**/bin/*
+
+# Keep useful libs
+!libs/**/Debug
+!libs/**/Release
+!libs/**/bin/*
+
+Debug/
+Release/
+
+.svn/
+obj/
+build/
+xcuserdata/
+
+ipch/
+*.suo
+*.opensdf
+*.vcxproj.user
+
+# Visual Studio temp files
+*.obj
+*.tlog
+*.sdf
+*.pdb
+*.idb
+*.pch
+
+
+# VVVV backup files
+*~.xml
