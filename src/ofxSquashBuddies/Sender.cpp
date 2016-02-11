@@ -114,6 +114,7 @@ namespace ofxSquashBuddies {
 			string message;
 			if (this->appToCompressor->receive(message)) {
 				Packet packet;
+				packet.packetIndex = 0;
 				packet.frameIndex = frameIndex;
 
 				struct {
@@ -146,6 +147,7 @@ namespace ofxSquashBuddies {
 							{
 								packet.payloadSize = payloadState.offset;
 								this->compressorToSocket->send(packet);
+								packet.packetIndex++;
 								packet.payloadSize = 0;
 							}
 
