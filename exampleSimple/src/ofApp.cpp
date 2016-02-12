@@ -8,7 +8,9 @@ void ofApp::setup(){
 
 	auto codecs = ofxSquash::getCodecList();
 
-	this->video.initGrabber(640, 480);
+	this->video.initGrabber(1280, 720);
+
+	ofSetWindowShape(this->video.getWidth() * 2, this->video.getHeight());
 
 	this->sender.init("127.0.0.1", 4444);
 	//this->sender.setCodec("density");
@@ -46,7 +48,6 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	this->video.draw(0, 0);
-
 }
 
 //--------------------------------------------------------------
