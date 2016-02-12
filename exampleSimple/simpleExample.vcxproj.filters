@@ -16,6 +16,9 @@
     <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp">
       <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\Message.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -50,10 +53,13 @@
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h">
       <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ofxSquashBuddies\Constants.h">
+    <ClInclude Include="..\src\ofxSquashBuddies\Packet.h">
       <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ofxSquashBuddies\Packet.h">
+    <ClInclude Include="..\src\ofxSquashBuddies\Message.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Constants.h">
       <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
   </ItemGroup>

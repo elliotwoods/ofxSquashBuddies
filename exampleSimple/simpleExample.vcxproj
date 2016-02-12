@@ -179,6 +179,7 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\ofxSquashBuddies\Message.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp" />
@@ -188,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\ofxSquashBuddies.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Constants.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\Message.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Packet.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Sender.h" />

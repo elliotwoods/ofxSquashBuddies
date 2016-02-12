@@ -14,7 +14,7 @@ namespace ofxSquashBuddies {
 		//CHECK IF INIT IS CALLED BEFORE USING THREAD CHANNELS!!!
 
 		//recreate the thread channels
-		this->appToCompressor = make_shared<ofThreadChannel<string>>();
+		this->appToCompressor = make_shared<ofThreadChannel<Message>>();
 		this->compressorToSocket = make_shared<ofThreadChannel<Packet>>();
 
 		this->socket = make_shared<ofxAsio::UDP::Client>();
@@ -36,7 +36,8 @@ namespace ofxSquashBuddies {
 	//----------
 	void Sender::close() {
 		this->threadsRunning = false;
-		if(this->appToCompressor) {
+
+		if (this->appToCompressor) {
 			this->appToCompressor->close();
 			this->appToCompressor.reset();
 		}
@@ -54,64 +55,30 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	void Sender::send(const void * payload, size_t payloadSize) {
-		string data;
-
-		//write the message
-		{
-			const auto headerSize = sizeof(Header::Raw);
-			auto messageSize = headerSize + payloadSize;
-
-			data.resize(messageSize);
-
-			auto & header = *static_cast<Header::Raw *>((void*)data.data());
-			header = Header::Raw();
-
-			if (payloadSize > 0) {
-				memcpy(&data[0] + headerSize, payload, payloadSize);
-			}
-		}
-
-		this->appToCompressor->send(data);
+	void Sender::send(const void * data, size_t size) {
+		this->appToCompressor->send(Message(data, size));
 	}
 
 	//----------
 	void Sender::send(const string & data) {
-		this->send(data.data(), data.size());
+		this->appToCompressor->send(Message(data));
 	}
 
 	//----------
-	void Sender::send(const ofPixels & pixels) {
-		string data;
+	void Sender::send(const ofPixels & data) {
+		this->send(Message(data));
+	}
 
-		//write the message
-		{
-			const auto headerSize = sizeof(Header::Pixels);
-			const auto payloadSize = pixels.size(); // inner payload
-			auto messageSize = payloadSize + headerSize;
-
-			data.resize(messageSize);
-
-			auto & header = *static_cast<Header::Pixels *>((void*)data.data());
-			header = Header::Pixels();
-
-			header.width = pixels.getWidth();
-			header.height = pixels.getHeight();
-			header.format = pixels.getPixelFormat();
-
-			if (payloadSize > 0) {
-				memcpy(&data[0] + headerSize, pixels.getData(), payloadSize);
-			}
-		}
-
-		this->send(data);
+	//----------
+	void Sender::send(const Message & message) {
+		this->appToCompressor->send(message);
 	}
 
 	//----------
 	void Sender::compressLoop() {
 		uint32_t frameIndex = 0;
 		while (this->threadsRunning) {
-			string message;
+			Message message;
 			if (this->appToCompressor->receive(message)) {
 				Packet packet;
 				packet.packetIndex = 0;
@@ -145,8 +112,14 @@ namespace ofxSquashBuddies {
 						if (payloadState.availableBytes == 0) {
 							//finish off the packet header and send whenever we have a full packet
 							{
-								packet.payloadSize = payloadState.offset;
-								this->compressorToSocket->send(packet);
+								if (payloadState.offset > numeric_limits<uint32_t>::max()) {
+									OFXSQUASHBUDDIES_ERROR << "Payload is too big! Sorry baby.";
+								}
+								else {
+									packet.payloadSize = (uint32_t)payloadState.offset;
+									this->compressorToSocket->send(packet);
+								}
+								
 								packet.packetIndex++;
 								packet.payloadSize = 0;
 							}
@@ -160,11 +133,15 @@ namespace ofxSquashBuddies {
 					}
 				});
 
-				compressStream << message << ofxSquash::Stream::Finish();
+				compressStream << message.getMessageString() << ofxSquash::Stream::Finish();
 
-				//if there's anything left over, then send it
-				if (payloadState.offset > 0) {
-					packet.payloadSize = payloadState.offset;
+				//send whatever is left over
+				if (payloadState.offset > numeric_limits<uint32_t>::max()) {
+					OFXSQUASHBUDDIES_ERROR << "Payload is too big! Sorry baby.";
+				}
+				else {
+					packet.payloadSize = (uint32_t) payloadState.offset;
+					packet.isLastPacket = true;
 					this->compressorToSocket->send(packet);
 				}
 
