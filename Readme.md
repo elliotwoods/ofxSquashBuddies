@@ -4,7 +4,7 @@ ofxSquashBuddies
 !["Women players at the Harvard Club" by Leslie Jones](https://raw.githubusercontent.com/elliotwoods/ofxSquashBuddies/master/Women%20players%20at%20the%20Harvard%20club.jpg)
 _Image courtesy of the Boston Public Library, Leslie Jones Collection._
 
-ofxSquashBuddies is a super low-latency method for sending data across a network by Elliot Woods and Satoru Higa.
+ofxSquashBuddies is a very low-latency system for transmitting data across a network.
 
 Typical 0.5 frames latency between 2 computers on a GigE connection for a 4MB image (e.g. 1080p YUY or 720p RGBA) stream. CPU usage is generally around 5% for this type of application.
 
@@ -29,6 +29,11 @@ Compatability
 =============
 
 Tested with openFrameworks 0.9.1. This addon should work on all platforms where ofxSquash and ofxAsio are supported.
+
+Credits
+=======
+
+ofxSquashBuddies is developed by Elliot Woods and Satoru Higa.
 
 License
 =======
