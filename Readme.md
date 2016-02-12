@@ -2,7 +2,7 @@ ofxSquashBuddies
 ================
 
 !["Women players at the Harvard Club" by Leslie Jones](https://raw.githubusercontent.com/elliotwoods/ofxSquashBuddies/master/Women%20players%20at%20the%20Harvard%20club.jpg)
-__Image courtesy of the Boston Public Library, Leslie Jones Collection.__
+_Image courtesy of the Boston Public Library, Leslie Jones Collection._
 
 ofxSquashBuddies is a super low-latency method for sending data across a network by Elliot Woods and Satoru Higa.
 
