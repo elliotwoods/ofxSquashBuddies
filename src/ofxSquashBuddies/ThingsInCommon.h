@@ -9,6 +9,9 @@
 
 #include "ofxAsio.h"
 
+#include <condition_variable>
+#include <thread>
+
 namespace ofxSquashBuddies {
 	class ThingsInCommon {
 	public:
