@@ -121,7 +121,7 @@ namespace ofxSquashBuddies {
 			if (!dataGram)
 				continue;
 
-			if (dataGram->getMessage().empty()) {
+			if (dataGram->getMessage().size() == 0) {
 				continue;
 			}
 
