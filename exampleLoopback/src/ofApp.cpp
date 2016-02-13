@@ -13,21 +13,8 @@ void ofApp::setup(){
 	ofSetWindowShape(this->video.getWidth() * 2, this->video.getHeight());
 
 	this->sender.init("127.0.0.1", 4444);
-	//this->sender.setCodec("density");
 
 	this->receiver.init(4444);
-	//this->reciever.setCodec("density");
-
-	// things you might want to send
-	//	* A raw buffer
-	//	* ofPixels
-	//	* ofSoundBuffer
-	//	* ofMesh
-	//	* a struct / simple type
-	//	* a vector or struct / simple type
-
-	// things we don't need to send
-	//	* things which should be serialised first (e.g. your own complex classes)
 
 }
 
@@ -38,6 +25,9 @@ void ofApp::update(){
 		this->sender.send(this->video.getPixels());
 	}
 
+	// In this example, 'receive' will be called directly after 'send' in the ofApp.
+	// Which means that there's no time for the frame to arrive in-between, so this example will likely always have 1 frame of delay.
+	// If we use 
 	this->receiver.update();
 	if (this->receiver.isFrameNew()) {
 		this->receiver.receive(this->receivedPreview.getPixels());
@@ -48,6 +38,8 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	this->video.draw(0, 0);
+	this->receivedPreview.draw(1280, 0);
+	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 20, 20);
 }
 
 //--------------------------------------------------------------

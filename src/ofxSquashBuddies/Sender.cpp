@@ -3,6 +3,11 @@
 
 namespace ofxSquashBuddies {
 	//----------
+	Sender::Sender() {
+		this->setCodec(this->getDefaultCodec());
+	}
+
+	//----------
 	Sender::~Sender() {
 		this->close();
 	}
@@ -12,6 +17,7 @@ namespace ofxSquashBuddies {
 		this->close();
 
 		//CHECK IF INIT IS CALLED BEFORE USING THREAD CHANNELS!!!
+		//or will they not be used at all if init isn't called?
 
 		//recreate the thread channels
 		this->appToCompressor = make_shared<ofThreadChannel<Message>>();
@@ -55,6 +61,16 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
+	void Sender::setCodec(const ofxSquash::Codec & codec) {
+		this->codec = codec;
+	}
+
+	//----------
+	const ofxSquash::Codec & Sender::getCodec() const {
+		return this->codec;
+	}
+
+	//----------
 	void Sender::send(const void * data, size_t size) {
 		this->appToCompressor->send(Message(data, size));
 	}
@@ -89,6 +105,10 @@ namespace ofxSquashBuddies {
 					size_t availableBytes = Packet::MaxPayloadSize;
 				} payloadState;
 
+				if (!this->getCodec().isValid()) {
+					OFXSQUASHBUDDIES_ERROR << "Codec [" << this->getCodec().getName() << "] is not valid. Are you sure you have the plugins installed correctly?";
+					continue;
+				}
 				ofxSquash::Stream compressStream(this->getCodec(), ofxSquash::Direction::Compress, [this, &packet, &payloadState](const ofxSquash::WriteFunctionArguments & args) {
 					//copy incoming data and split into packets
 
@@ -158,13 +178,16 @@ namespace ofxSquashBuddies {
 			this->configMutex.unlock();
 
 			Packet packet;
-			if (this->compressorToSocket->receive(packet)) {
+			while (this->compressorToSocket->receive(packet)) {
 				if (this->socket) {
 					auto dataGram = make_shared<ofxAsio::UDP::DataGram>();
 					dataGram->setEndPoint(config.endPoint);
 
 					dataGram->getMessage().set(&packet, sizeof(packet));
 					this->socket->send(dataGram);
+				}
+				else {
+					OFXSQUASHBUDDIES_WARNING << "Socket not connected, cannot send packets.";
 				}
 			}
 		}

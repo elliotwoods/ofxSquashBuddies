@@ -11,9 +11,13 @@
 namespace ofxSquashBuddies {
 	class Sender : public ThingsInCommon {
 	public:
+		Sender();
 		~Sender();
 		void init(string ipAddress, int port);
 		void close();
+
+		void setCodec(const ofxSquash::Codec &) override;
+		const ofxSquash::Codec & getCodec() const override;
 
 		void send(const void *, size_t);
 		void send(const string &);
@@ -28,6 +32,8 @@ namespace ofxSquashBuddies {
 	protected:
 		void compressLoop();
 		void socketLoop();
+
+		ofxSquash::Codec codec;
 
 		bool threadsRunning = false;
 		thread compressThread;

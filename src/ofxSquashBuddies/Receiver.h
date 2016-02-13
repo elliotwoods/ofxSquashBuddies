@@ -9,48 +9,42 @@
 namespace ofxSquashBuddies {
 	class Receiver : public ThingsInCommon {
 	public:
+		Receiver();
 		~Receiver();
 
 		void init(int port);
 		void close();
 
+		void setCodec(const ofxSquash::Codec &) override;
+		const ofxSquash::Codec & getCodec() const override;
+
 		void update();
+
 		bool isFrameNew() const;
-		bool isFrameIncoming() const;
+		const Message & getMessage() const;
+		Message getNextMessage(uint64_t timeoutMS);
 
-		template<typename Type>
-		bool receive(Type &);
+		bool receive(string &);
+		bool receive(ofPixels &);
 
-		template<typename Type>
-		bool receiveNext(Type &, const chrono::milliseconds & timeOut);
-
+		ofEvent<Message> onMessageReceive;
+		ofEvent<Message> onMessageReceiveThreaded;
 	protected:
 		atomic_bool threadsRunning;
+
+		ofxSquash::Codec codec;
+
 		thread socketThread;
-
-		shared_ptr<ofxAsio::UDP::Server> socket;
-		shared_ptr<ofThreadChannel<string>> decompressorToApp;
-
-		atomic_bool frameNew;
-
 		void socketLoop();
+		shared_ptr<ofxAsio::UDP::Server> socket;
 
-	protected:
-		shared_ptr<ofxSquash::Stream> stream;
 		FrameBufferSet frameBuffers;
+
+		thread frameReceiverThread;
+		void frameReceiverLoop();
+		ofThreadChannel<Message> frameReceiverToApp;
+
+		Message message;
+		atomic_bool frameNew;
 	};
-
-	//==========
-
-	template<typename Type>
-	bool ofxSquashBuddies::Receiver::receive(Type &)
-	{
-
-	}
-
-	template<typename Type>
-	bool ofxSquashBuddies::Receiver::receiveNext(Type &, const chrono::milliseconds & timeOut)
-	{
-
-	}
 }

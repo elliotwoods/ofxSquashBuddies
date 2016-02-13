@@ -12,11 +12,10 @@
 namespace ofxSquashBuddies {
 	class ThingsInCommon {
 	public:
-		void setCodec(const ofxSquash::Codec &);
+		virtual void setCodec(const ofxSquash::Codec &) = 0;
 		void setCodec(const string & codecName);
-		const ofxSquash::Codec & getCodec() const;
+		virtual const ofxSquash::Codec & getCodec() const = 0;
 
-	protected:
-		ofxSquash::Codec codec = ofxSquash::Codec("density");
+		static ofxSquash::Codec getDefaultCodec();
 	};
 }
