@@ -1,1 +1,3 @@
+ofxAsio
 ofxSquash
+ofxSquashBuddies

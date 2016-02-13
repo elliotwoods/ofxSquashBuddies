@@ -6,8 +6,6 @@
 #include "ofPixels.h"
 #include "ofMesh.h"
 
-#include <condition_variable>
-
 namespace ofxSquashBuddies {
 	class Sender : public ThingsInCommon {
 	public:
@@ -30,8 +28,8 @@ namespace ofxSquashBuddies {
 		void socketLoop();
 
 		bool threadsRunning = false;
-		thread compressThread;
-		thread socketThread;
+		std::thread compressThread;
+		std::thread socketThread;
 
 		shared_ptr<ofxAsio::UDP::Client> socket;
 
