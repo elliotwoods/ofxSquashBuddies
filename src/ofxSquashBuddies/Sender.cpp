@@ -95,7 +95,7 @@ namespace ofxSquashBuddies {
 		uint32_t frameIndex = 0;
 		while (this->threadsRunning) {
 			Message message;
-			if (this->appToCompressor->receive(message)) {
+			while (this->appToCompressor->receive(message)) {
 				Packet packet;
 				packet.header.packetIndex = 0;
 				packet.header.frameIndex = frameIndex;
