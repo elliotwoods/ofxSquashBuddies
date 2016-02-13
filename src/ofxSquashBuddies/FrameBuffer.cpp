@@ -61,10 +61,11 @@ namespace ofxSquashBuddies {
 	void FrameBuffer::clear() {
 		if (!this->packets.empty()) {
 			//We cleared before all our packets were processed
+			auto last = max<uint16_t>(this->packetIndexPosition, this->packets.rbegin()->first);
 			cout << "Dropped frame : [";
-			for (int i = 0; i < this->packetIndexPosition; i++) {
+			for (int i = 0; i < last; i++) {
 				auto findPacket = this->packets.find(i);
-				if (findPacket == this->packets.end()) {
+				if (findPacket == this->packets.end() && i >= this->packetIndexPosition) {
 					cout << " ";
 				}
 				else {
