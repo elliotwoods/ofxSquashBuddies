@@ -6,6 +6,7 @@
 
 #include "ofThreadChannel.h"
 #include "ofxSquash/Stream.h"
+#include "ofxAsio/UDP/DataGram.h"
 
 #include <string>
 #include <map>
@@ -33,10 +34,6 @@ namespace ofxSquashBuddies {
 
 		ofxSquash::Codec codec = ThingsInCommon::getDefaultCodec();
 
-		ofThreadChannel<Packet> socketToPacketStore;
-
-		void packetStoreLoop();
-		thread packetStoreThread;
 		map<uint16_t, unique_ptr<Packet>> packets;
 		int32_t packetIndexPosition = 0;
 		ofThreadChannel<Packet> bufferToDecompressor;
@@ -54,14 +51,20 @@ namespace ofxSquashBuddies {
 	class FrameBufferSet {
 	public:
 		FrameBufferSet();
+		~FrameBufferSet();
 
 		void setCodec(const ofxSquash::Codec &);
 
 		FrameBuffer & getFrameBuffer(uint32_t frameIndex);
 		bool isExpired(uint32_t frameIndex) const;
 
+		ofThreadChannel<shared_ptr<ofxAsio::UDP::DataGram>> socketToFrameBuffers;
 		ofThreadChannel<Message> decompressorToFrameReceiver;
 	protected:
 		vector<shared_ptr<FrameBuffer>> frameBuffers;
+
+		thread dataGramProcessorThread;
+		void dataGramProcessorLoop();
+		bool threadRunning = true;
 	};
 }

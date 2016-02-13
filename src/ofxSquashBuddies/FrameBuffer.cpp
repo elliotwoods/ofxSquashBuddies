@@ -10,9 +10,6 @@ namespace ofxSquashBuddies {
 	{		
 		this->clear();
 
-		this->packetStoreThread = thread([this]() {
-			this->packetStoreLoop();
-		});
 		this->decompressThread = thread([this]() {
 			this->decompressLoop();
 		});
@@ -21,12 +18,8 @@ namespace ofxSquashBuddies {
 	//---------
 	FrameBuffer::~FrameBuffer() {
 		this->threadsRunning = false;
-		this->socketToPacketStore.close();
 		this->bufferToDecompressor.close();
 
-		if (this->packetStoreThread.joinable()) {
-			this->packetStoreThread.join();
-		}
 		if (this->decompressThread.joinable()) {
 			this->decompressThread.join();
 		}
@@ -54,7 +47,27 @@ namespace ofxSquashBuddies {
 
 	//---------
 	void FrameBuffer::add(const Packet & packet) {
-		this->socketToPacketStore.send(packet);
+		//store the packet
+		this->packets.emplace(packet.header.packetIndex, make_unique<Packet>(packet));
+
+		//pass any sequential packets to the decompressor
+		auto firstPacketInBuffer = this->packets.begin();
+		while (this->packetIndexPosition == firstPacketInBuffer->first) {
+			//send it
+			this->bufferToDecompressor.send(*firstPacketInBuffer->second.get());
+
+			//remove from here
+			this->packets.erase(firstPacketInBuffer);
+			this->packetIndexPosition++;
+
+			//if there's still more to do
+			if (this->packets.empty()) {
+				break;
+			}
+			else {
+				firstPacketInBuffer = this->packets.begin();
+			}
+		}
 	}
 
 	//---------
@@ -83,36 +96,6 @@ namespace ofxSquashBuddies {
 		this->stream->setWriteFunction([this](const ofxSquash::WriteFunctionArguments & args) {
 			this->writeFunction(args);
 		});
-	}
-
-	//---------
-	void FrameBuffer::packetStoreLoop() {
-		while (this->threadsRunning) {
-			Packet packet;
-			while (this->socketToPacketStore.receive(packet)) {
-				//store the packet
-				this->packets.emplace(packet.header.packetIndex, make_unique<Packet>(packet));
-
-				//pass any sequential packets to the decompressor
-				auto firstPacketInBuffer = this->packets.begin();
-				while (this->packetIndexPosition == firstPacketInBuffer->first) {
-					//send it
-					this->bufferToDecompressor.send(*firstPacketInBuffer->second.get());
-
-					//remove from here
-					this->packets.erase(firstPacketInBuffer);
-					this->packetIndexPosition++;
-
-					//if there's still more to do
-					if (this->packets.empty()) {
-						break;
-					}
-					else {
-						firstPacketInBuffer = this->packets.begin();
-					}
-				}
-			}
-		}
 	}
 
 	//---------
@@ -147,6 +130,19 @@ namespace ofxSquashBuddies {
 	FrameBufferSet::FrameBufferSet() {
 		for (int i = 0; i < 3; i++) {
 			this->frameBuffers.emplace_back(make_shared<FrameBuffer>(this->decompressorToFrameReceiver));
+		}
+
+		this->dataGramProcessorThread = thread([this]() {
+			this->dataGramProcessorLoop();
+		});
+	}
+
+	//---------
+	FrameBufferSet::~FrameBufferSet() {
+		this->threadRunning = false;
+		this->socketToFrameBuffers.close();
+		if (this->dataGramProcessorThread.joinable()) {
+			this->dataGramProcessorThread.join();
 		}
 	}
 
@@ -204,5 +200,26 @@ namespace ofxSquashBuddies {
 		}
 
 		return false;
+	}
+
+	//---------
+	void FrameBufferSet::dataGramProcessorLoop() {
+		while (this->threadRunning) {
+			shared_ptr<ofxAsio::UDP::DataGram> dataGram;
+			while (this->socketToFrameBuffers.receive(dataGram)) {
+				auto & message = dataGram->getMessage();
+				if (message.empty()) {
+					continue;
+				}
+				Packet packet(message);
+
+				if (this->isExpired(packet.header.frameIndex)) {
+					continue;
+				}
+
+				auto & frameBuffer = this->getFrameBuffer(packet.header.frameIndex);
+				frameBuffer.add(packet);
+			}
+		}
 	}
 }

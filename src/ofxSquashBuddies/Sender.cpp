@@ -185,7 +185,6 @@ namespace ofxSquashBuddies {
 
 					dataGram->getMessage().set(&packet, sizeof(packet));
 					this->socket->send(dataGram);
-					std::this_thread::sleep_for(chrono::nanoseconds(10));
 				}
 				else {
 					OFXSQUASHBUDDIES_WARNING << "Socket not connected, cannot send packets.";

@@ -30,6 +30,8 @@ namespace ofxSquashBuddies {
 		ofEvent<Message> onMessageReceive;
 		ofEvent<Message> onMessageReceiveThreaded;
 	protected:
+		void asyncCallback(shared_ptr<ofxAsio::UDP::DataGram>);
+
 		atomic_bool threadsRunning;
 
 		ofxSquash::Codec codec;

@@ -18,12 +18,18 @@ namespace ofxSquashBuddies {
 
 		this->socket = make_shared<ofxAsio::UDP::Server>(port);
 
+// 		this->socket->asyncReceiveAll([this](ofxAsio::UDP::Socket::AsyncArguments args) {
+// 			if (args.success) {
+// 				this->asyncCallback(args.dataGram);
+// 			}
+// 		}, Packet::PacketSize * 2);
+
 		this->frameBuffers.setCodec(this->codec);
 
 		this->threadsRunning = true;
-		this->socketThread = thread([this]() {
-			this->socketLoop();
-		});
+ 		this->socketThread = thread([this]() {
+ 			this->socketLoop();
+ 		});
 		this->frameReceiverThread = thread([this]() {
 			this->frameReceiverLoop();
 		});
@@ -115,26 +121,15 @@ namespace ofxSquashBuddies {
 
 #pragma mark protected
 	//---------
+	void Receiver::asyncCallback(shared_ptr<ofxAsio::UDP::DataGram> dataGram) {
+		this->frameBuffers.socketToFrameBuffers.send(dataGram);
+	}
+
+	//---------
 	void Receiver::socketLoop() {
 		while (this->threadsRunning) {
 			auto dataGram = socket->receive();
-			if (!dataGram)
-				continue;
-
-			if (dataGram->getMessage().empty()) {
-				continue;
-			}
-
-			Packet packet(dataGram->getMessage());
-
-			if (this->frameBuffers.isExpired(packet.header.frameIndex)) {
-				return;
-			}
-
-			// cout << "rx-f=" << packet.header.frameIndex << "\tp=" << packet.header.packetIndex << endl;
-
-			auto & frameBuffer = this->frameBuffers.getFrameBuffer(packet.header.frameIndex);
-			frameBuffer.add(packet);
+			this->frameBuffers.socketToFrameBuffers.send(dataGram);
 		}
 	}
 

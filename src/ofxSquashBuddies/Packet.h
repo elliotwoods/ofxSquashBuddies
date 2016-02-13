@@ -34,6 +34,15 @@ struct Packet {
 		}
 	}
 
+	Packet(const string & message) {
+		if (message.size() >= HeaderSize) {
+			memcpy(this->headerBuffer, message.data(), HeaderSize);
+		}
+		if (message.size() >= HeaderSize + this->header.payloadSize) {
+			memcpy(this->payload, message.data() + HeaderSize, this->header.payloadSize);
+		}
+	}
+
 	//header
 	union {
 		Header header;
