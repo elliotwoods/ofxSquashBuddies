@@ -1,29 +1,42 @@
 #pragma once
 
 #include <stdint.h>
+#include "ofxAsio/UDP/DataGram.h"
 
 struct Packet {
-	Packet() {
-		this->packetIndex = 0;
-		this->frameIndex = 0;
-		this->payloadSize = 0;
-		this->isLastPacket = false;
-	}
-
+	//constants
 	enum {
 		PacketSize = 4096,
 		HeaderSize = 4 + 4 + 4 + 4,
 		MaxPayloadSize = PacketSize - HeaderSize
 	};
 
+	struct Header {
+		uint32_t packetIndex;
+		uint32_t frameIndex;
+		uint32_t payloadSize;
+		uint32_t isLastPacket;
+	};
+
+	Packet() {
+		this->header.packetIndex = 0;
+		this->header.frameIndex = 0;
+		this->header.payloadSize = 0;
+		this->header.isLastPacket = false;
+	}
+
+	Packet(const ofxAsio::UDP::DataGram::Message & message) {
+		if (message.size() >= HeaderSize) {
+			memcpy(this->headerBuffer, message.data(), HeaderSize);
+		}
+		if (message.size() >= HeaderSize + this->header.payloadSize) {
+			memcpy(this->payload, message.data() + HeaderSize, this->header.payloadSize);
+		}
+	}
+
 	//header
 	union {
-		struct {
-			uint32_t packetIndex;
-			uint32_t frameIndex;
-			uint32_t payloadSize;
-			uint32_t isLastPacket;
-		};
+		Header header;
 		uint8_t headerBuffer[16];
 	};
 

@@ -81,8 +81,8 @@ namespace ofxSquashBuddies {
 			Message message;
 			if (this->appToCompressor->receive(message)) {
 				Packet packet;
-				packet.packetIndex = 0;
-				packet.frameIndex = frameIndex;
+				packet.header.packetIndex = 0;
+				packet.header.frameIndex = frameIndex;
 
 				struct {
 					size_t offset = 0;
@@ -116,12 +116,12 @@ namespace ofxSquashBuddies {
 									OFXSQUASHBUDDIES_ERROR << "Payload is too big! Sorry baby.";
 								}
 								else {
-									packet.payloadSize = (uint32_t)payloadState.offset;
+									packet.header.payloadSize = (uint32_t)payloadState.offset;
 									this->compressorToSocket->send(packet);
 								}
 								
-								packet.packetIndex++;
-								packet.payloadSize = 0;
+								packet.header.packetIndex++;
+								packet.header.payloadSize = 0;
 							}
 
 							//reset the packet for next use
@@ -140,8 +140,8 @@ namespace ofxSquashBuddies {
 					OFXSQUASHBUDDIES_ERROR << "Payload is too big! Sorry baby.";
 				}
 				else {
-					packet.payloadSize = (uint32_t) payloadState.offset;
-					packet.isLastPacket = true;
+					packet.header.payloadSize = (uint32_t) payloadState.offset;
+					packet.header.isLastPacket = true;
 					this->compressorToSocket->send(packet);
 				}
 

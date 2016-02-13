@@ -19,6 +19,9 @@
     <ClCompile Include="..\src\ofxSquashBuddies\Message.cpp">
       <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\FrameBuffer.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -60,6 +63,9 @@
       <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxSquashBuddies\Constants.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\FrameBuffer.h">
       <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
     </ClInclude>
   </ItemGroup>

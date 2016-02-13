@@ -187,11 +187,50 @@
 				<key>sourceTree</key>
 				<string>SOURCE_ROOT</string>
 			</dict>
+			<key>36D304C555CA824F4E07F47D</key>
+			<dict>
+				<key>explicitFileType</key>
+				<string>sourcecode.c.h</string>
+				<key>fileEncoding</key>
+				<string>30</string>
+				<key>isa</key>
+				<string>PBXFileReference</string>
+				<key>name</key>
+				<string>FrameBuffer.h</string>
+				<key>path</key>
+				<string>../../../addons/ofxSquashBuddies/src/ofxSquashBuddies/FrameBuffer.h</string>
+				<key>sourceTree</key>
+				<string>SOURCE_ROOT</string>
+			</dict>
+			<key>728029BA615E70C5EE5A14D6</key>
+			<dict>
+				<key>fileRef</key>
+				<string>C0C57579F47772C39857C0EB</string>
+				<key>isa</key>
+				<string>PBXBuildFile</string>
+			</dict>
+			<key>C0C57579F47772C39857C0EB</key>
+			<dict>
+				<key>explicitFileType</key>
+				<string>sourcecode.cpp.cpp</string>
+				<key>fileEncoding</key>
+				<string>30</string>
+				<key>isa</key>
+				<string>PBXFileReference</string>
+				<key>name</key>
+				<string>FrameBuffer.cpp</string>
+				<key>path</key>
+				<string>../../../addons/ofxSquashBuddies/src/ofxSquashBuddies/FrameBuffer.cpp</string>
+				<key>sourceTree</key>
+				<string>SOURCE_ROOT</string>
+			</dict>
 			<key>2A1740F95FECC384D86EF5D6</key>
 			<dict>
 				<key>children</key>
 				<array>
 					<string>B3C31174D5631125113775E1</string>
+					<string>C0C57579F47772C39857C0EB</string>
+					<string>36D304C555CA824F4E07F47D</string>
 					<string>5111ADC568D350117E2E6877</string>
 					<string>83BA409C8F216E7D4528C30E</string>
 					<string>B4EBA2BCB546D362ABC99662</string>
@@ -8054,6 +8093,7 @@
 					<string>ADFC80A9593467DCA96F6A17</string>
 					<string>36BF87080017D570CCD003FF</string>
 					<string>0F045A94B36D18E2EAD14418</string>
+					<string>728029BA615E70C5EE5A14D6</string>
 					<string>B67B0DD05A4206FF04494BDE</string>
 					<string>86E8973DA309CAC86A85C379</string>
 					<string>A9C9075546046D742280892D</string>
