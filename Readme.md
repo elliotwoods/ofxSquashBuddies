@@ -6,17 +6,19 @@ _Image courtesy of the Boston Public Library, Leslie Jones Collection._
 
 ofxSquashBuddies is a very low-latency system for transmitting data across a network.
 
-Typical 0.5 frames latency between 2 computers on a GigE connection for a 4MB image (e.g. 1080p YUY or 720p RGBA) stream.
+Typica < 1 frame latency between 2 computers on a GigE connection for a 4MB image at 30fps (e.g. 1080p YUY or 720p RGBA), at less than 5% CPU on both sender and receiver.
 
 Why is it so fast?
 ------------------
 
-Due to its threaded stream architecture, it can:
+We've made quite a few speed optimisations:
 
-* Send whilst it is compressing
-* Decompress whilst it is receiving
+* Send whilst we are compressing (i.e. don't wait for 1 to finish before starting the next one on another thread. This means same amount of computation is required but overall latency is significantly reduced).
+* Decompress whilst we are receiving
+* We use the !(Density)[https://github.com/centaurean/density] compression algorithm (approx 2x faster than Snappy at around the same compression ratio).
+* We use !(ASIO)[http://think-async.com/] socket library (as used by GigE Vision libraries).
 
-This reduces the overall latency in the system since processes can happen simultanaously.
+All of these systems are open source and cross platform.
 
 Requirements
 ============
@@ -28,7 +30,7 @@ Requirements
 Compatability
 =============
 
-Tested with openFrameworks 0.9.1. This addon should work on all platforms where ofxSquash and ofxAsio are supported.
+Tested with openFrameworks 0.9.1 on OSX and Windows. This addon should work on all platforms where ofxSquash and ofxAsio are supported.
 
 Credits
 =======
