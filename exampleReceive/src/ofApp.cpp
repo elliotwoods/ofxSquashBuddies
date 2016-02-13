@@ -4,11 +4,11 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+	auto port = 4444;
+	this->receiver.init(port);
+
+	ofSetWindowTitle("Receiving : " + ofToString(port));
 	ofSetFrameRate(60);
-	ofSetWindowTitle("Receiver");
-
-	this->receiver.init(4444);
-
 }
 
 //--------------------------------------------------------------

@@ -4,13 +4,20 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	ofSetFrameRate(60);
-	ofSetWindowTitle("Sender");
+	auto port = 4444;
+	string ipAddress = "127.0.0.1";
 
-	this->video.initGrabber(1280, 720);
+	auto result = ofSystemTextBoxDialog("Target IP Address (Default : " + ipAddress + ")");
+	if (!result.empty()) {
+		ipAddress = result;
+	}
 
 	this->sender.init("127.0.0.1", 4444);
 
+
+	ofSetWindowTitle("Sending to : " + ipAddress + ":" + ofToString(port));
+	ofSetFrameRate(60);
+	this->video.initGrabber(1280, 720);
 }
 
 //--------------------------------------------------------------
