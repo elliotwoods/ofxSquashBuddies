@@ -61,7 +61,17 @@ namespace ofxSquashBuddies {
 	void FrameBuffer::clear() {
 		if (!this->packets.empty()) {
 			//We cleared before all our packets were processed
-			OFXSQUASHBUDDIES_NOTICE << "Dropped frame.";
+			cout << "Dropped frame : [";
+			for (int i = 0; i < this->packetIndexPosition; i++) {
+				auto findPacket = this->packets.find(i);
+				if (findPacket == this->packets.end()) {
+					cout << " ";
+				}
+				else {
+					cout << ".";
+				}
+			}
+			cout << "]" << endl;
 		}
 		this->message.clear();
 		this->packets.clear();
@@ -133,76 +143,65 @@ namespace ofxSquashBuddies {
 
 #pragma mark FrameBufferSet
 	//---------
-	FrameBufferSet::FrameBufferSet() :
-		A(decompressorToFrameReceiver),
-		B(decompressorToFrameReceiver) {
-
+	FrameBufferSet::FrameBufferSet() {
+		for (int i = 0; i < 3; i++) {
+			this->frameBuffers.emplace_back(make_shared<FrameBuffer>(this->decompressorToFrameReceiver));
+		}
 	}
 
 	//---------
 	void FrameBufferSet::setCodec(const ofxSquash::Codec & codec) {
-		this->A.setCodec(codec);
-		this->B.setCodec(codec);
+		for (auto & frameBuffer : this->frameBuffers) {
+			frameBuffer->setCodec(codec);
+		}
 	}
 
 	//---------
 	FrameBuffer & FrameBufferSet::getFrameBuffer(uint32_t frameIndex) {
-		if (A.getFrameIndex() == frameIndex) {
-			return A;
-		}
-		else if (B.getFrameIndex() == frameIndex) {
-			return B;
-		}
-		else {
-			//we need to reassign one of our frames for this new frameIndex
-			//generally frameIndex increases 1 per frame, but it may also jump backwards (e.g. if a client restarts)
-
-			auto currentA = this->A.getFrameIndex();
-			auto currentB = this->B.getFrameIndex();
-
-			auto currentMaxFrameIndex = max<uint32_t>(currentA, currentB);
-			auto currentMinFrameIndex = min<uint32_t>(currentA, currentB);
-			auto BisAfterA = currentB >= currentA;
-
-			FrameBuffer * frameToUse;
-
-			if (frameIndex > currentMaxFrameIndex) {
-				//frameIndex is increasing
-				frameToUse = BisAfterA ? &this->A : &this->B;
+		for (auto & frameBuffer : this->frameBuffers) {
+			if (frameBuffer->getFrameIndex() == frameIndex) {
+				return * frameBuffer;
 			}
-			else {
-				//frameIndex skipped backwards, e.g. client restarts
-				frameToUse = BisAfterA ? &this->B : &this->A;
-			}
-
-			frameToUse->clear();
-			frameToUse->setFrameIndex(frameIndex);
-			return *frameToUse;
 		}
+
+		//if we got to here, we didn't have one matching
+		auto maxDistance = 0;
+		shared_ptr<FrameBuffer> furthest;
+		for (auto & frameBuffer : this->frameBuffers) {
+			auto distance = abs((int)frameBuffer->getFrameIndex() - (int) frameIndex);
+			if (distance > maxDistance) {
+				maxDistance = distance;
+				furthest = frameBuffer;
+			}
+		}
+		furthest->clear();
+		furthest->setFrameIndex(frameIndex);
+		return *furthest;
 	}
 
 	//---------
 	bool FrameBufferSet::isExpired(uint32_t frameIndex) const {
-		auto currentA = this->A.getFrameIndex();
-		auto currentB = this->B.getFrameIndex();
-		if (currentA == frameIndex) {
-			return false;
-		}
-		else if (currentB == frameIndex) {
-			return false;
-		}
-		else {
-			auto currentMinFrameIndex = min<uint32_t>(this->A.getFrameIndex(), this->B.getFrameIndex());
-
-			if (frameIndex < currentMinFrameIndex) {
-				//we're skipping backwards
-				if (frameIndex + 30 < currentMinFrameIndex) {
-					//ignore up to 30 before the current active frame index
-					return true;
-				}
+		for (auto frameBuffer : this->frameBuffers) {
+			if (frameBuffer->getFrameIndex() == frameIndex) {
+				return false;
 			}
-
-			return false;
 		}
+
+		auto currentMinFrameIndex = numeric_limits<uint32_t>::max();
+		for (auto frameBuffer : this->frameBuffers) {
+			if (frameBuffer->getFrameIndex() < currentMinFrameIndex) {
+				currentMinFrameIndex = frameBuffer->getFrameIndex();
+			}
+		}
+
+		if (frameIndex < currentMinFrameIndex) {
+			//we're skipping backwards
+			if (frameIndex + 30 < currentMinFrameIndex) {
+				//ignore up to 30 before the current active frame index
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

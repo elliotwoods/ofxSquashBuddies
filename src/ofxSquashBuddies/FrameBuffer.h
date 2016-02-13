@@ -62,6 +62,6 @@ namespace ofxSquashBuddies {
 
 		ofThreadChannel<Message> decompressorToFrameReceiver;
 	protected:
-		FrameBuffer A, B;
+		vector<shared_ptr<FrameBuffer>> frameBuffers;
 	};
 }
