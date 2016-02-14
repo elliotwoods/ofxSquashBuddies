@@ -15,7 +15,7 @@ We've made quite a few speed optimisations:
 
 * Send whilst we are compressing (i.e. don't wait for 1 to finish before starting the next one on another thread. This means same amount of computation is required but overall latency is significantly reduced).
 * Decompress whilst we are receiving
-* We use the [Density](https://github.com/centaurean/density] compression algorithm (approx 2x faster than Snappy at around the same compression ratio).
+* We use the [Density](https://github.com/centaurean/density) compression algorithm (approx 2x faster than Snappy at around the same compression ratio).
 * We use [ASIO](http://think-async.com/) socket library (as used by GigE Vision libraries).
 * We use blocking networking on dedicated threads with condition variable syncing (this gives more performance than async routines).
 
