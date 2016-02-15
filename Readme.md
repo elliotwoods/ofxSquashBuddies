@@ -6,7 +6,7 @@ _Image courtesy of the Boston Public Library, Leslie Jones Collection._
 
 ofxSquashBuddies is a very low-latency system for transmitting data across a network.
 
-When transmitting a 4MB image over a dedicated GigE connection, we had __< 1 frame latency__ 30fps, at less than 5% CPU on both sender and receiver. 1080p YUY or 720p RGBA are both approximately 4MB.
+When transmitting a 4MB image over a dedicated GigE connection, we had __< 1 frame latency__ 30fps, at less than 5% CPU on both sender and receiver. 1080p YUY, 720p RGBA or a Kinect V2 RGB+D+Skeleton frame are all approximately 4MB.
 
 Why is it so fast?
 ------------------
