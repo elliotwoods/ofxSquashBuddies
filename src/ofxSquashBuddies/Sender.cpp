@@ -92,7 +92,12 @@ namespace ofxSquashBuddies {
 
 	//----------
 	void Sender::send(const Message & message) {
-		this->appToCompressor->send(message);
+		if (!this->appToCompressor) {
+			OFXSQUASHBUDDIES_ERROR << "You cannot call send before you call init";
+		}
+		else {
+			this->appToCompressor->send(message);
+		}
 	}
 
 	//----------

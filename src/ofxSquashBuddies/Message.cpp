@@ -34,7 +34,7 @@ namespace ofxSquashBuddies {
 
 	//----------
 	void Message::setData(const void * data, size_t size) {
-		this->headerAndData.resize(size + sizeof(Header::String));
+		this->headerAndBody.resize(size + sizeof(Header::String));
 
 		auto & header = this->getHeader<Header::String>(true);
 		auto body = this->getBodyData();
@@ -46,7 +46,7 @@ namespace ofxSquashBuddies {
 		const auto headerSize = sizeof(Header::Pixels);
 		const auto bodySize = data.size(); // inner payload
 
-		this->headerAndData.resize(headerSize + bodySize);
+		this->headerAndBody.resize(headerSize + bodySize);
 
 		auto & header = this->getHeader<Header::Pixels>(true);
 		header.width = data.getWidth();
@@ -69,7 +69,7 @@ namespace ofxSquashBuddies {
 
 		const size_t bodySize = verticesDataSize + colorsDataSize + normalsDataSize + texCoordsDataSize + indicesDataSize;
 		
-		this->headerAndData.resize(headerSize + bodySize);
+		this->headerAndBody.resize(headerSize + bodySize);
 
 		// header
 		{
@@ -110,7 +110,7 @@ namespace ofxSquashBuddies {
 
 	//----------
 	void Message::clear() {
-		this->headerAndData.clear();
+		this->headerAndBody.clear();
 	}
 
 	//----------
@@ -238,22 +238,22 @@ namespace ofxSquashBuddies {
 
 	//----------
 	void Message::pushData(const void * data, size_t dataSize) {
-		this->headerAndData.append((const char *) data, dataSize);
+		this->headerAndBody.append((const char *) data, dataSize);
 	}
 
 	//----------
 	void * Message::getHeaderData() {
-		return (void *) this->headerAndData.data();
+		return (void *) this->headerAndBody.data();
 	}
 
 	//----------
 	const void * Message::getHeaderData() const {
-		return (void *) this->headerAndData.data();
+		return (void *) this->headerAndBody.data();
 	}
 
 	//----------
 	size_t Message::getHeaderSize() const {
-		if (this->headerAndData.size() > sizeof(Header::Basic)) {
+		if (this->headerAndBody.size() > sizeof(Header::Basic)) {
 			const auto & header = this->getHeader<Header::Basic>();
 			return header.headerSize;
 		}
@@ -264,25 +264,25 @@ namespace ofxSquashBuddies {
 
 	//----------
 	void * Message::getBodyData() {
-		return &this->headerAndData[0] + this->getHeaderSize();
+		return &this->headerAndBody[0] + this->getHeaderSize();
 	}
 
 	//----------
 	const void * Message::getBodyData() const {
-		return &this->headerAndData[0] + this->getHeaderSize();
+		return &this->headerAndBody[0] + this->getHeaderSize();
 	}
 
 	//----------
 	size_t Message::getBodySize() const {
-		return this->headerAndData.size() - this->getHeaderSize();
+		return this->headerAndBody.size() - this->getHeaderSize();
 	}
 
 	//----------
 	bool Message::empty() const {
-		if (this->headerAndData.empty()) {
+		if (this->headerAndBody.empty()) {
 			return true;
 		}
-		else if(this->headerAndData.size() < this->getHeaderSize()) {
+		else if(this->headerAndBody.size() < this->getHeaderSize()) {
 			return true;
 		}
 		else {
@@ -291,7 +291,12 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
+	void Message::resizeHeaderAndBody(size_t size) {
+		this->headerAndBody.resize(size);
+	}
+
+	//----------
 	const string & Message::getMessageString() const {
-		return this->headerAndData;
+		return this->headerAndBody;
 	}
 }

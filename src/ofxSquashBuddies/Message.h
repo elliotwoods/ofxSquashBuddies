@@ -84,6 +84,24 @@ namespace ofxSquashBuddies {
 				uint8_t reserved[2];
 			};
 		};
+
+		struct MultiTrack_2_2_Frame {
+			enum Constants : size_t {
+				ColorSize = 1280 * 720 * 2,
+				DepthSize = 512 * 424 * 2,
+				InfraredSize = 512 * 424 * 2,
+				BodyIndexSize = 512 * 424 * 1,
+				ColorCoordInDepthViewSize = 512 * 424 * 2 * 2,
+				SkeletonSize = ((7 * 4) + 1) * 20 * 6,
+
+				TotalDataSize = ColorSize + DepthSize + InfraredSize + BodyIndexSize + ColorCoordInDepthViewSize + SkeletonSize
+			};
+
+			struct {
+				uint16_t headerSize = 4;
+				MessageType messageType = MessageType::MultiTrack_2_2_Frame;
+			};
+		};
 	}
 
 	class Message {
@@ -143,8 +161,9 @@ namespace ofxSquashBuddies {
 			return header;
 		}
 
+		void resizeHeaderAndBody(size_t);
 		const string & getMessageString() const;
 	protected:
-		string headerAndData;
+		string headerAndBody;
 	};
 }
