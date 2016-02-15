@@ -23,6 +23,11 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
+	Message::Message(const ofMesh & data) {
+		this->setData(data);
+	}
+
+	//----------
 	void Message::setData(const string & data) {
 		this->setData(data.data(), data.size());
 	}
@@ -50,6 +55,57 @@ namespace ofxSquashBuddies {
 
 		auto body = this->getBodyData();
 		memcpy(body, data.getData(), bodySize);
+	}
+
+	//----------
+	void Message::setData(const ofMesh & data) {
+		const auto headerSize = sizeof(Header::Mesh);
+		
+		const auto verticesDataSize = data.getNumVertices() * sizeof(ofVec3f);
+		const auto colorsDataSize = data.getNumColors() * sizeof(ofFloatColor);
+		const auto normalsDataSize = data.getNumNormals() * sizeof(ofVec3f);
+		const auto texCoordsDataSize = data.getNumTexCoords() * sizeof(ofVec2f);
+		const auto indicesDataSize = data.getNumIndices() * sizeof(ofIndexType);
+
+		const size_t bodySize = verticesDataSize + colorsDataSize + normalsDataSize + texCoordsDataSize + indicesDataSize;
+		
+		this->headerAndData.resize(headerSize + bodySize);
+
+		// header
+		{
+			auto & header = this->getHeader<Header::Mesh>(true);
+			header.verticesSize = (uint32_t) data.getNumVertices();
+			header.colorsSize = (uint32_t) data.getNumColors();
+			header.normalsSize = (uint32_t) data.getNumNormals();
+			header.texCoordsSize = (uint32_t) data.getNumTexCoords();
+			header.indicesSize = (uint32_t) data.getNumIndices();
+
+			header.primitiveMode = data.getMode();
+
+			header.useColors = data.usingColors();
+			header.useNormals = data.usingNormals();
+			header.useTextures = data.usingTextures();
+			header.useIndices = data.usingIndices();
+		}
+
+		// body
+		{
+			auto body = (uint8_t *) this->getBodyData();
+
+			memcpy(body, data.getVerticesPointer(), verticesDataSize);
+			body += verticesDataSize;
+
+			memcpy(body, data.getColorsPointer(), colorsDataSize);
+			body += colorsDataSize;
+
+			memcpy(body, data.getNormalsPointer(), normalsDataSize);
+			body += normalsDataSize;
+
+			memcpy(body, data.getTexCoordsPointer(), texCoordsDataSize);
+			body += texCoordsDataSize;
+
+			memcpy(body, data.getIndexPointer(), indicesDataSize);
+		}
 	}
 
 	//----------
@@ -93,7 +149,6 @@ namespace ofxSquashBuddies {
 
 	//----------
 	bool Message::getData(ofPixels & data) const {
-		auto & header = this->getHeader<Header::Pixels>();
 		if (this->hasHeader<Header::Pixels>()) {
 			const auto & header = this->getHeader<Header::Pixels>();
 			auto bodySize = this->getBodySize();
@@ -116,6 +171,69 @@ namespace ofxSquashBuddies {
 			OFXSQUASHBUDDIES_WARNING << "Message Header doesn't match Pixels type";
 			return false;
 		}
+	}
+
+	//----------
+	bool Message::getData(ofMesh & data) const {
+		if (this->hasHeader<Header::Mesh>()) {
+			const auto & header = this->getHeader<Header::Mesh>();
+			auto bodySize = this->getBodySize();
+
+			auto & vertices = data.getVertices();
+			auto & colors = data.getColors();
+			auto & normals = data.getNormals();
+			auto & texCoords = data.getTexCoords();
+			auto & indices = data.getIndices();
+
+			//resize as needed
+			vertices.resize(header.verticesSize);
+			colors.resize(header.colorsSize);
+			normals.resize(header.normalsSize);
+			texCoords.resize(header.texCoordsSize);
+			indices.resize(header.indicesSize);
+
+			//data sizes
+			const auto verticesDataSize = header.verticesSize * sizeof(ofVec3f);
+			const auto colorsDataSize = header.colorsSize * sizeof(ofFloatColor);
+			const auto normalsDataSize = header.normalsSize * sizeof(ofVec3f);
+			const auto texCoordsDataSize = header.texCoordsSize * sizeof(ofVec2f);
+			const auto indicesDataSize = header.indicesSize * sizeof(ofIndexType);
+
+			//copy in data
+			{
+				auto body = (uint8_t *) this->getBodyData();
+
+				memcpy(data.getVerticesPointer(), body, verticesDataSize);
+				body += verticesDataSize;
+
+				memcpy(data.getColorsPointer(), body, colorsDataSize);
+				body += colorsDataSize;
+
+				memcpy(data.getNormalsPointer(), body, normalsDataSize);
+				body += normalsDataSize;
+
+				memcpy(data.getTexCoordsPointer(), body, texCoordsDataSize);
+				body += texCoordsDataSize;
+
+				memcpy(data.getIndexPointer(), body, indicesDataSize);
+				body += indicesDataSize;
+			}
+
+			//apply header
+			{
+				data.setMode((ofPrimitiveMode) header.primitiveMode);
+				header.useColors ? data.enableColors() : data.disableColors();
+				header.useNormals ? data.enableNormals() : data.disableNormals();
+				header.useTextures ? data.enableTextures() : data.disableTextures();
+			}
+
+			return true;
+		}
+		else {
+			OFXSQUASHBUDDIES_WARNING << "Message Header doesn't match Mesh type";
+			return false;
+		}
+
 	}
 
 	//----------

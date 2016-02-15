@@ -26,6 +26,7 @@ namespace ofxSquashBuddies {
 
 		bool receive(string &);
 		bool receive(ofPixels &);
+		bool receive(ofMesh &);
 
 		ofEvent<Message> onMessageReceive;
 		ofEvent<Message> onMessageReceiveThreaded;

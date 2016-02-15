@@ -119,6 +119,17 @@ namespace ofxSquashBuddies {
 		}
 	}
 
+	//---------
+	bool Receiver::receive(ofMesh & data) {
+		if (this->message.empty()) {
+			OFXSQUASHBUDDIES_WARNING << "Cannot receive. Message is empty";
+			return false;
+		}
+		else {
+			return this->message.getData(data);
+		}
+	}
+
 #pragma mark protected
 	//---------
 	void Receiver::asyncCallback(shared_ptr<ofxAsio::UDP::DataGram> dataGram) {

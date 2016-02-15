@@ -86,6 +86,11 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
+	void Sender::send(const ofMesh & data) {
+		this->send(Message(data));
+	}
+
+	//----------
 	void Sender::send(const Message & message) {
 		this->appToCompressor->send(message);
 	}

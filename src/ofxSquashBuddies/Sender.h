@@ -20,6 +20,7 @@ namespace ofxSquashBuddies {
 		void send(const void *, size_t);
 		void send(const string &);
 		void send(const ofPixels &);
+		void send(const ofMesh &);
 		void send(const Message &);
 
 		template<typename PodType, typename std::enable_if<std::is_pod<PodType>::value, void>::type>

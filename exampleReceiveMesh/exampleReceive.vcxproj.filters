@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\ofApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\Message.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\FrameBuffer.cpp">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons">
+      <UniqueIdentifier>{79825aa4-020b-4150-aee7-56bd2fffc038}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxSquashBuddies">
+      <UniqueIdentifier>{c7e6f826-7cd8-4885-8c03-faeb475e7818}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxSquashBuddies\src">
+      <UniqueIdentifier>{1493368f-5779-4061-be23-8a81c8ed2d02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxSquashBuddies\src\ofxSquashBuddies">
+      <UniqueIdentifier>{283f1e32-ab6f-42a2-9c31-579326e74458}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ofApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies.h">
+      <Filter>addons\ofxSquashBuddies\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Sender.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Packet.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Message.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Constants.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\FrameBuffer.h">
+      <Filter>addons\ofxSquashBuddies\src\ofxSquashBuddies</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
+</Project>

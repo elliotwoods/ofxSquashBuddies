@@ -56,6 +56,7 @@ namespace ofxSquashBuddies {
 			struct {
 				uint16_t headerSize = 10;
 				MessageType messageType = MessageType::Pixels;
+
 				uint16_t width;
 				uint16_t height;
 				uint16_t pixelFormat;
@@ -64,8 +65,23 @@ namespace ofxSquashBuddies {
 
 		struct Mesh {
 			struct {
-				uint16_t headerSize = 4;
+				uint16_t headerSize = 32;
 				MessageType messageType = MessageType::Mesh;
+
+				uint32_t verticesSize;
+				uint32_t colorsSize;
+				uint32_t normalsSize;
+				uint32_t texCoordsSize;
+				uint32_t indicesSize;
+
+				uint16_t primitiveMode;
+
+				uint8_t useColors;
+				uint8_t useNormals;
+				uint8_t useTextures;
+				uint8_t useIndices;
+
+				uint8_t reserved[2];
 			};
 		};
 	}
@@ -76,20 +92,19 @@ namespace ofxSquashBuddies {
 		Message(const string &);
 		Message(const void * data, size_t size);
 		Message(const ofPixels &);
+		Message(const ofMesh &);
 		
 		void setData(const string &);
 		void setData(const void * data, size_t size);
 		void setData(const ofPixels &);
+		void setData(const ofMesh &);
 
 		void clear();
 
 		bool getData(string &) const;
-
-		// `data` should be a buffer which you have allocated with size `size`
-		// this function modifies the `size` argument to be the actual size
-		// but DOES NOT change the actual size of the buffer
-		bool getData(void * data, size_t & size) const;
+		bool getData(void * data, size_t & size) const; // size in = your buffer size, size out = how much of your buffer we're now using
 		bool getData(ofPixels &) const;
+		bool getData(ofMesh &) const;
 
 		void pushData(const void * data, size_t size);
 
