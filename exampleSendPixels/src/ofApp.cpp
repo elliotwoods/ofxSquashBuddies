@@ -12,7 +12,7 @@ void ofApp::setup(){
 		ipAddress = result;
 	}
 
-	this->sender.init(ipAddress, 4444);
+	this->sender.init(ipAddress, port);
 
 
 	ofSetWindowTitle("Sending to : " + ipAddress + ":" + ofToString(port));
