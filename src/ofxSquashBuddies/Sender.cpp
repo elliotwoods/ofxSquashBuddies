@@ -45,11 +45,9 @@ namespace ofxSquashBuddies {
 
 		if (this->appToCompressor) {
 			this->appToCompressor->close();
-			this->appToCompressor.reset();
 		}
 		if (this->compressorToSocket) {
 			this->compressorToSocket->close();
-			this->compressorToSocket.reset();
 		}
 
 		if (this->compressThread.joinable()) {
@@ -58,6 +56,9 @@ namespace ofxSquashBuddies {
 		if (this->socketThread.joinable()) {
 			this->socketThread.join();
 		}
+
+		this->appToCompressor.reset();
+		this->compressorToSocket.reset();
 	}
 
 	//----------
@@ -72,22 +73,22 @@ namespace ofxSquashBuddies {
 
 	//----------
 	void Sender::send(const void * data, size_t size) {
-		this->appToCompressor->send(Message(data, size));
+		this->send(move(Message(data, size)));
 	}
 
 	//----------
 	void Sender::send(const string & data) {
-		this->appToCompressor->send(Message(data));
+		this->send(move(Message(data)));
 	}
 
 	//----------
 	void Sender::send(const ofPixels & data) {
-		this->send(Message(data));
+		this->send(move(Message(data)));
 	}
 
 	//----------
 	void Sender::send(const ofMesh & data) {
-		this->send(Message(data));
+		this->send(move(Message(data)));
 	}
 
 	//----------
@@ -97,6 +98,16 @@ namespace ofxSquashBuddies {
 		}
 		else {
 			this->appToCompressor->send(message);
+		}
+	}
+
+	//----------
+	void Sender::send(const Message && message) {
+		if (!this->appToCompressor) {
+			OFXSQUASHBUDDIES_ERROR << "You cannot call send before you call init";
+		}
+		else {
+			this->appToCompressor->send(move(message));
 		}
 	}
 

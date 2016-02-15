@@ -150,7 +150,7 @@ namespace ofxSquashBuddies {
 			Message message;
 			if (this->frameBuffers.decompressorToFrameReceiver.receive(message)) {
 				this->onMessageReceiveThreaded.notify(this, message);
-				this->frameReceiverToApp.send(message);
+				this->frameReceiverToApp.send(move(message));
 			}
 		}
 	}

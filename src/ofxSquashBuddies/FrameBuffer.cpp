@@ -113,7 +113,7 @@ namespace ofxSquashBuddies {
 				if (packet.header.isLastPacket)
 				{
 					(* this->stream) << ofxSquash::Stream::Finish();
-					this->decompressorToFrameReceiver.send(this->message);
+					this->decompressorToFrameReceiver.send(move(this->message));
 					this->clear();
 				}
 			}
