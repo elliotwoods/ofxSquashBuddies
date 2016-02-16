@@ -5,7 +5,7 @@
 namespace ofxSquashBuddies {
 #pragma mark FrameBuffer
 	//---------
-	FrameBuffer::FrameBuffer(ofThreadChannel<Message> & decompressorToFrameReceiver) :
+	FrameBuffer::FrameBuffer(ThreadChannel<Message> & decompressorToFrameReceiver) :
 	decompressorToFrameReceiver(decompressorToFrameReceiver)
 	{		
 		this->clear();
@@ -18,7 +18,7 @@ namespace ofxSquashBuddies {
 	//---------
 	FrameBuffer::~FrameBuffer() {
 		this->threadsRunning = false;
-		this->bufferToDecompressor.close();
+		this->packetsToDecompressor.close();
 
 		if (this->decompressThread.joinable()) {
 			this->decompressThread.join();
@@ -47,14 +47,17 @@ namespace ofxSquashBuddies {
 
 	//---------
 	void FrameBuffer::add(const Packet & packet) {
+		auto lock = unique_lock<mutex>(this->packetsMutex);
+
 		//store the packet
 		this->packets.emplace(packet.header.packetIndex, make_unique<Packet>(packet));
+		
 
 		//pass any sequential packets to the decompressor
 		auto firstPacketInBuffer = this->packets.begin();
 		while (this->packetIndexPosition == firstPacketInBuffer->first) {
 			//send it
-			this->bufferToDecompressor.send(*firstPacketInBuffer->second.get());
+			this->packetsToDecompressor.send(*firstPacketInBuffer->second.get());
 
 			//remove from here
 			this->packets.erase(firstPacketInBuffer);
@@ -72,41 +75,61 @@ namespace ofxSquashBuddies {
 
 	//---------
 	void FrameBuffer::clear() {
-		if (!this->packets.empty()) {
-			//We cleared before all our packets were processed
-			auto last = max<uint16_t>(this->packetIndexPosition, this->packets.rbegin()->first);
-			cout << "Dropped frame : [";
-			for (int i = 0; i < last; i++) {
-				auto findPacket = this->packets.find(i);
-				if (findPacket == this->packets.end() && i >= this->packetIndexPosition) {
-					cout << " ";
-				}
-				else {
-					cout << ".";
-				}
-			}
-			cout << "]" << endl;
-		}
-		this->message.clear();
-		this->packets.clear();
-		this->frameIndex = 0;
-		this->packetIndexPosition = 0;
+		{
+			auto lock = unique_lock<mutex>(this->packetsMutex);
 
-		this->stream = make_unique<ofxSquash::Stream>(this->codec, ofxSquash::Decompress);
-		this->stream->setWriteFunction([this](const ofxSquash::WriteFunctionArguments & args) {
-			this->writeFunction(args);
-		});
+			if (!this->packets.empty()) {
+				//We cleared before all our packets were processed
+				auto lastPacket = max<uint16_t>(this->packetIndexPosition, this->packets.rbegin()->first);
+				size_t droppedPackets = 0;
+				for (int i = 0; i < lastPacket; i++) {
+					auto findPacket = this->packets.find(i);
+					if (findPacket == this->packets.end() && i >= this->packetIndexPosition) {
+						droppedPackets++;
+					}
+				}
+
+				//send a DroppedFrame back up the chain
+				DroppedFrame droppedFrame = {
+					DroppedFrame::DroppedPackets,
+					droppedPackets,
+					lastPacket
+				};
+				onDroppedFrame.notify(this, droppedFrame);
+			}
+
+			this->packets.clear();
+			this->packetIndexPosition = 0;
+		}
+
+		{
+			auto lock = unique_lock<mutex>(this->messageMutex);
+			this->message.clear();
+		}
+
+		{
+			auto lock = unique_lock<mutex>(this->streamMutex);
+
+			this->stream = make_unique<ofxSquash::Stream>(this->codec, ofxSquash::Decompress);
+			this->stream->setWriteFunction([this](const ofxSquash::WriteFunctionArguments & args) {
+				this->writeFunction(args);
+			});
+		}
+
+		this->frameIndex = 0;
 	}
 
 	//---------
 	void FrameBuffer::decompressLoop() {
 		while (this->threadsRunning) {
 			Packet packet;
-			if (this->bufferToDecompressor.receive(packet)) {
+			if (this->packetsToDecompressor.receive(packet)) {
 				if (!this->codec.isValid()) {
 					OFXSQUASHBUDDIES_ERROR << "Codec [" << this->codec.getName() << "] is not valid. Are you sure you have the plugins installed correctly?";
 					continue;
 				}
+
+				auto lock = unique_lock<mutex>(this->streamMutex);
 
 				this->stream->read((const void*)packet.payload, packet.header.payloadSize);
 
@@ -114,6 +137,8 @@ namespace ofxSquashBuddies {
 				{
 					(* this->stream) << ofxSquash::Stream::Finish();
 					this->decompressorToFrameReceiver.send(move(this->message));
+					
+					lock.unlock();
 					this->clear();
 				}
 			}
@@ -129,7 +154,9 @@ namespace ofxSquashBuddies {
 	//---------
 	FrameBufferSet::FrameBufferSet() {
 		for (int i = 0; i < 3; i++) {
-			this->frameBuffers.emplace_back(make_shared<FrameBuffer>(this->decompressorToFrameReceiver));
+			auto frameBuffer = make_shared<FrameBuffer>(this->decompressorToFrameReceiver);
+			this->frameBuffers.emplace_back(frameBuffer);
+			frameBuffer->onDroppedFrame.add(this, &FrameBufferSet::callbackDroppedFrame, 0);
 		}
 
 		this->dataGramProcessorThread = thread([this]() {
@@ -163,13 +190,28 @@ namespace ofxSquashBuddies {
 
 		//if we got to here, we didn't have one matching
 		auto maxDistance = 0;
-		shared_ptr<FrameBuffer> furthest;
+		auto minDistance = numeric_limits<int>::max();
+		shared_ptr<FrameBuffer> furthest, closest;
 		for (auto & frameBuffer : this->frameBuffers) {
 			auto distance = abs((int)frameBuffer->getFrameIndex() - (int) frameIndex);
 			if (distance > maxDistance) {
 				maxDistance = distance;
 				furthest = frameBuffer;
 			}
+			if (distance < minDistance) {
+				minDistance = distance;
+				closest = frameBuffer;
+			}
+		}
+
+		//notify dropped frames if we're going forwards
+		if (minDistance < OFXSQUASHBUDDIES_MAX_FRAME_DISCONTINUITY && closest->getFrameIndex() < frameIndex) {
+			DroppedFrame droppedFrame = {
+				DroppedFrame::Reason::SkippedFrame,
+				0,
+				0
+			};
+			this->droppedFrames.send(droppedFrame);
 		}
 		furthest->clear();
 		furthest->setFrameIndex(frameIndex);
@@ -203,6 +245,11 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
+	void FrameBufferSet::callbackDroppedFrame(DroppedFrame & droppedFrame) {
+		this->droppedFrames.send(droppedFrame);
+	}
+
+	//---------
 	void FrameBufferSet::dataGramProcessorLoop() {
 		while (this->threadRunning) {
 			shared_ptr<ofxAsio::UDP::DataGram> dataGram;
@@ -216,7 +263,7 @@ namespace ofxSquashBuddies {
 				if (this->isExpired(packet.header.frameIndex)) {
 					continue;
 				}
-
+				
 				auto & frameBuffer = this->getFrameBuffer(packet.header.frameIndex);
 				frameBuffer.add(packet);
 			}

@@ -6,7 +6,7 @@
 struct Packet {
 	//constants
 	enum {
-		PacketSize = 1024 * 8,
+		PacketSize = 9000,
 		HeaderSize = 4 + 4 + 4 + 4,
 		MaxPayloadSize = PacketSize - HeaderSize
 	};

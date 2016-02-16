@@ -33,6 +33,9 @@
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\ThreadChannel.h">
+      <Filter>src\ofxSquashBuddies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ofxSquashBuddies\FrameBuffer.cpp">

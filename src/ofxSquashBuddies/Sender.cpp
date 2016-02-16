@@ -21,7 +21,7 @@ namespace ofxSquashBuddies {
 
 		//recreate the thread channels
 		this->appToCompressor = make_shared<ofThreadChannel<Message>>();
-		this->compressorToSocket = make_shared<ofThreadChannel<Packet>>();
+		this->compressorToSocket = make_shared<ThreadChannel<Packet>>();
 
 		this->socket = make_shared<ofxAsio::UDP::Client>();
 
@@ -72,43 +72,60 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	void Sender::send(const void * data, size_t size) {
-		this->send(move(Message(data, size)));
+	bool Sender::send(const void * data, size_t size) {
+		return this->send(move(Message(data, size)));
 	}
 
 	//----------
-	void Sender::send(const string & data) {
-		this->send(move(Message(data)));
+	bool Sender::send(const string & data) {
+		return this->send(move(Message(data)));
 	}
 
 	//----------
-	void Sender::send(const ofPixels & data) {
-		this->send(move(Message(data)));
+	bool Sender::send(const ofPixels & data) {
+		return this->send(move(Message(data)));
 	}
 
 	//----------
-	void Sender::send(const ofMesh & data) {
-		this->send(move(Message(data)));
+	bool Sender::send(const ofMesh & data) {
+		return this->send(move(Message(data)));
 	}
 
 	//----------
-	void Sender::send(const Message & message) {
+	bool Sender::send(const Message & message) {
+		auto messageCopy = message;
+		return this->send(move(messageCopy));
+	}
+
+	//----------
+	bool Sender::send(Message && message) {
 		if (!this->appToCompressor) {
 			OFXSQUASHBUDDIES_ERROR << "You cannot call send before you call init";
+			return false;
 		}
 		else {
-			this->appToCompressor->send(message);
+			if (compressorToSocket->size() < this->maxSocketBufferSize) {
+				return this->appToCompressor->send(move(message));
+			}
+			else {
+				return false;
+			}
 		}
 	}
 
 	//----------
-	void Sender::send(const Message && message) {
-		if (!this->appToCompressor) {
-			OFXSQUASHBUDDIES_ERROR << "You cannot call send before you call init";
-		}
-		else {
-			this->appToCompressor->send(move(message));
-		}
+	void Sender::setMaxSocketBufferSize(size_t maxSocketBufferSize) {
+		this->maxSocketBufferSize = maxSocketBufferSize;
+	}
+
+	//----------
+	size_t Sender::getMaxSocketBufferSize() const {
+		return this->maxSocketBufferSize;
+	}
+
+	//----------
+	size_t Sender::getCurrentSocketBufferSize() const {
+		return this->compressorToSocket->size();
 	}
 
 	//----------
@@ -195,7 +212,7 @@ namespace ofxSquashBuddies {
 	void Sender::socketLoop() {
 		while (this->threadsRunning) {
 			this->configMutex.lock();
-			auto config = this->config;
+			Config config = this->config;
 			this->configMutex.unlock();
 
 			Packet packet;

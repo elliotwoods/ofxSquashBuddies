@@ -16,7 +16,13 @@ namespace ofxSquashBuddies {
 	void Receiver::init(int port) {
 		this->close();
 
-		this->socket = make_shared<ofxAsio::UDP::Server>(port);
+		try {
+			this->socket = make_shared<ofxAsio::UDP::Server>(port);
+		}
+		catch (std::exception & e) {
+			OFXSQUASH_ERROR << "Failed to open Receiver on port " << port << " : " << e.what();
+			return;
+		}
 
 // 		this->socket->asyncReceiveAll([this](ofxAsio::UDP::Socket::AsyncArguments args) {
 // 			if (args.success) {
@@ -25,11 +31,14 @@ namespace ofxSquashBuddies {
 // 		}, Packet::PacketSize * 2);
 
 		this->frameBuffers.setCodec(this->codec);
+		this->frameBuffers.decompressorToFrameReceiver.reset();
 
 		this->threadsRunning = true;
- 		this->socketThread = thread([this]() {
- 			this->socketLoop();
- 		});
+		for (int i = 0; i < OFXSQUASHBUDDIES_RECEIVETHREADCOUNT; i++) {
+			this->socketThread[i] = thread([this]() {
+				this->socketLoop();
+			});
+		}
 		this->frameReceiverThread = thread([this]() {
 			this->frameReceiverLoop();
 		});
@@ -38,11 +47,22 @@ namespace ofxSquashBuddies {
 	//---------
 	void Receiver::close() {
 		this->threadsRunning = false;
-		
-		//close threads
-		if (this->socketThread.joinable()) {
-			this->socketThread.join();
+
+		//close socketThread
+		if (this->socket) {
+			this->socket->close();
 		}
+		for (int i = 0; i < OFXSQUASHBUDDIES_RECEIVETHREADCOUNT; i++) {
+			if (this->socketThread[i].joinable()) {
+				this->socketThread[i].join();
+			}
+		}
+		if (this->socket) {
+			this->socket.reset();
+		}
+
+		//close frameReceiverThread
+		this->frameBuffers.decompressorToFrameReceiver.close();
 		if (this->frameReceiverThread.joinable()) {
 			this->frameReceiverThread.join();
 		}
@@ -62,6 +82,7 @@ namespace ofxSquashBuddies {
 	//---------
 	void Receiver::update() {
 		bool newFrameReceived = false;
+
 		Message message;
 		while (this->frameReceiverToApp.tryReceive(message)) {
 			this->onMessageReceive.notify(this, message);
@@ -73,6 +94,12 @@ namespace ofxSquashBuddies {
 		}
 		else {
 			this->frameNew = false;
+		}
+
+		this->droppedFrames.clear();
+		DroppedFrame droppedFrame;
+		while (this->frameBuffers.droppedFrames.tryReceive(droppedFrame)) {
+			this->droppedFrames.push_back(move(droppedFrame));
 		}
 	}
 
@@ -130,6 +157,11 @@ namespace ofxSquashBuddies {
 		}
 	}
 
+	//---------
+	vector<DroppedFrame> Receiver::getDroppedFrames() const {
+		return this->droppedFrames;
+	}
+
 #pragma mark protected
 	//---------
 	void Receiver::asyncCallback(shared_ptr<ofxAsio::UDP::DataGram> dataGram) {
@@ -139,8 +171,10 @@ namespace ofxSquashBuddies {
 	//---------
 	void Receiver::socketLoop() {
 		while (this->threadsRunning) {
-			auto dataGram = socket->receive();
-			this->frameBuffers.socketToFrameBuffers.send(dataGram);
+			auto dataGram = socket->receive(Packet::PacketSize * 2);
+			if (dataGram) {
+				this->frameBuffers.socketToFrameBuffers.send(dataGram);
+			}
 		}
 	}
 

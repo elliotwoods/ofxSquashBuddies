@@ -6,6 +6,7 @@
 #include "ofThreadChannel.h"
 #include "ofEvent.h"
 
+#define OFXSQUASHBUDDIES_RECEIVETHREADCOUNT 3
 namespace ofxSquashBuddies {
 	class Receiver : public ThingsInCommon {
 	public:
@@ -21,12 +22,15 @@ namespace ofxSquashBuddies {
 		void update();
 
 		bool isFrameNew() const;
+
 		const Message & getMessage() const;
 		Message getNextMessage(uint64_t timeoutMS);
 
 		bool receive(string &);
 		bool receive(ofPixels &);
 		bool receive(ofMesh &);
+
+		vector<DroppedFrame> getDroppedFrames() const;
 
 		ofEvent<Message> onMessageReceive;
 		ofEvent<Message> onMessageReceiveThreaded;
@@ -37,17 +41,19 @@ namespace ofxSquashBuddies {
 
 		ofxSquash::Codec codec;
 
-		thread socketThread;
+		thread socketThread[OFXSQUASHBUDDIES_RECEIVETHREADCOUNT];
 		void socketLoop();
 		shared_ptr<ofxAsio::UDP::Server> socket;
 
 		FrameBufferSet frameBuffers;
 
-		thread frameReceiverThread;
+		thread frameReceiverThread; //consumes decompressorToFrameReceiver
 		void frameReceiverLoop();
 		ofThreadChannel<Message> frameReceiverToApp;
 
 		Message message;
 		atomic_bool frameNew;
+		
+		vector<DroppedFrame> droppedFrames;
 	};
 }

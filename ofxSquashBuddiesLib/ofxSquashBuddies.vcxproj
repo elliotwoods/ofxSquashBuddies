@@ -27,6 +27,7 @@
     <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Sender.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\ThreadChannel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ofxSquashBuddies\FrameBuffer.cpp" />
