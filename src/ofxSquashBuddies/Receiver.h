@@ -13,7 +13,7 @@ namespace ofxSquashBuddies {
 		Receiver();
 		~Receiver();
 
-		void init(int port);
+		bool init(int port);
 		void close();
 
 		void setCodec(const ofxSquash::Codec &) override;

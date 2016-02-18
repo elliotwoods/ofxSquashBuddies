@@ -13,7 +13,7 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	void Receiver::init(int port) {
+	bool Receiver::init(int port) {
 		this->close();
 
 		try {
@@ -21,14 +21,8 @@ namespace ofxSquashBuddies {
 		}
 		catch (std::exception & e) {
 			OFXSQUASH_ERROR << "Failed to open Receiver on port " << port << " : " << e.what();
-			return;
+			return false;
 		}
-
-// 		this->socket->asyncReceiveAll([this](ofxAsio::UDP::Socket::AsyncArguments args) {
-// 			if (args.success) {
-// 				this->asyncCallback(args.dataGram);
-// 			}
-// 		}, Packet::PacketSize * 2);
 
 		this->frameBuffers.setCodec(this->codec);
 		this->frameBuffers.decompressorToFrameReceiver.reset();
@@ -42,6 +36,8 @@ namespace ofxSquashBuddies {
 		this->frameReceiverThread = thread([this]() {
 			this->frameReceiverLoop();
 		});
+
+		return true;
 	}
 
 	//---------
