@@ -4,18 +4,19 @@
 #include "ofxAsio/UDP/DataGram.h"
 
 struct Packet {
-	//constants
-	enum {
-		PacketSize = 9000,
-		HeaderSize = 4 + 4 + 4 + 4,
-		MaxPayloadSize = PacketSize - HeaderSize
-	};
-
 	struct Header {
 		uint32_t packetIndex;
 		uint32_t frameIndex;
 		uint32_t payloadSize;
 		uint32_t isLastPacket;
+	};
+
+	//constants
+	enum {
+		DefaultPacketSize = 4 * 1024,
+		PacketAllocationSize = 9000,
+		HeaderSize = sizeof(Header),
+		MaxPayloadSize = PacketAllocationSize - HeaderSize
 	};
 
 	Packet() {
@@ -41,6 +42,10 @@ struct Packet {
 		if (message.size() >= HeaderSize + this->header.payloadSize) {
 			memcpy(this->payload, message.data() + HeaderSize, this->header.payloadSize);
 		}
+	}
+
+	size_t size() const {
+		return sizeof(Header) + header.payloadSize;
 	}
 
 	//header

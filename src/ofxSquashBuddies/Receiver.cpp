@@ -18,6 +18,7 @@ namespace ofxSquashBuddies {
 
 		try {
 			this->socket = make_shared<ofxAsio::UDP::Server>(port);
+			this->port = port;
 		}
 		catch (std::exception & e) {
 			OFXSQUASH_ERROR << "Failed to open Receiver on port " << port << " : " << e.what();
@@ -62,6 +63,18 @@ namespace ofxSquashBuddies {
 		if (this->frameReceiverThread.joinable()) {
 			this->frameReceiverThread.join();
 		}
+
+		this->port = 0;
+	}
+
+	//----------
+	int Receiver::getPort() const {
+		return this->port;
+	}
+
+	//----------
+	ofxAsio::UDP::Server & Receiver::getSocketServer() {
+		return *this->socket;
 	}
 
 	//---------
@@ -92,11 +105,21 @@ namespace ofxSquashBuddies {
 			this->frameNew = false;
 		}
 
+		//bring in which data frames were dropped this application frame
 		this->droppedFrames.clear();
 		DroppedFrame droppedFrame;
 		while (this->frameBuffers.droppedFrames.tryReceive(droppedFrame)) {
 			this->droppedFrames.push_back(move(droppedFrame));
 		}
+
+		//add incoming fps to frame rate timer, and update the frame rate
+		{
+			chrono::high_resolution_clock::time_point timePoint;
+			while (this->frameReceiverToFrameRateCalculator.tryReceive(timePoint)) {
+				this->incomingFrameRateCounter.addFrame(timePoint);
+			}
+		}
+		this->incomingFrameRateCounter.update();
 	}
 
 	//---------
@@ -158,6 +181,11 @@ namespace ofxSquashBuddies {
 		return this->droppedFrames;
 	}
 
+	//----------
+	float Receiver::getIncomingFramerate() const {
+		return this->incomingFrameRateCounter.getFrameRate();
+	}
+
 #pragma mark protected
 	//---------
 	void Receiver::asyncCallback(shared_ptr<ofxAsio::UDP::DataGram> dataGram) {
@@ -167,7 +195,7 @@ namespace ofxSquashBuddies {
 	//---------
 	void Receiver::socketLoop() {
 		while (this->threadsRunning) {
-			auto dataGram = socket->receive(Packet::PacketSize * 2);
+			auto dataGram = socket->receive(Packet::PacketAllocationSize * 2);
 			if (dataGram) {
 				this->frameBuffers.socketToFrameBuffers.send(dataGram);
 			}
@@ -181,6 +209,7 @@ namespace ofxSquashBuddies {
 			if (this->frameBuffers.decompressorToFrameReceiver.receive(message)) {
 				this->onMessageReceiveThreaded.notify(this, message);
 				this->frameReceiverToApp.send(move(message));
+				this->frameReceiverToFrameRateCalculator.send(chrono::high_resolution_clock::now());
 			}
 		}
 	}

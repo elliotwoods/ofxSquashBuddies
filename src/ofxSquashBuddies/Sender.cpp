@@ -105,12 +105,25 @@ namespace ofxSquashBuddies {
 		}
 		else {
 			if (compressorToSocket->size() < this->maxSocketBufferSize) {
-				return this->appToCompressor->send(move(message));
+				auto success = this->appToCompressor->send(move(message));
+				if (success) {
+					this->sendFramerateCounter.addFrame();
+					this->sendFramerateCounter.update();
+					return true;
+				}
+				else {
+					return false;
+				}
 			}
 			else {
 				return false;
 			}
 		}
+	}
+
+	//----------
+	float Sender::getSendFramerate() const {
+		return this->sendFramerateCounter.getFrameRate();
 	}
 
 	//----------
@@ -129,6 +142,24 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
+	size_t Sender::getPacketSize() const {
+		return this->packetSize;
+	}
+
+	//----------
+	void Sender::setPacketSize(size_t packetSize) {
+		if (packetSize > Packet::PacketAllocationSize) {
+			OFXSQUASHBUDDIES_WARNING << "Cannot set packet size to [" << packetSize << "] as it is higher than Packet::PacketSize";
+			packetSize = Packet::PacketAllocationSize;
+		}
+		if (packetSize < Packet::HeaderSize + 16) {
+			OFXSQUASHBUDDIES_WARNING << "Cannot set packet size to [" << packetSize << "] as it is lower than the minimum packet size";
+			packetSize = Packet::HeaderSize + 16;
+		}
+		this->packetSize = packetSize;
+	}
+
+	//----------
 	void Sender::compressLoop() {
 		uint32_t frameIndex = 0;
 		while (this->threadsRunning) {
@@ -140,8 +171,9 @@ namespace ofxSquashBuddies {
 
 				struct {
 					size_t offset = 0;
-					size_t availableBytes = Packet::MaxPayloadSize;
+					size_t availableBytes;
 				} payloadState;
+				payloadState.availableBytes = this->packetSize - Packet::HeaderSize;
 
 				if (!this->getCodec().isValid()) {
 					OFXSQUASHBUDDIES_ERROR << "Codec [" << this->getCodec().getName() << "] is not valid. Are you sure you have the plugins installed correctly?";
@@ -185,7 +217,7 @@ namespace ofxSquashBuddies {
 							//reset the packet for next use
 							{
 								payloadState.offset = 0;
-								payloadState.availableBytes = Packet::MaxPayloadSize;
+								payloadState.availableBytes = this->packetSize - Packet::HeaderSize;
 							}
 						}
 					}
@@ -221,7 +253,8 @@ namespace ofxSquashBuddies {
 					auto dataGram = make_shared<ofxAsio::UDP::DataGram>();
 					dataGram->setEndPoint(config.endPoint);
 
-					dataGram->getMessage().set(&packet, sizeof(packet));
+					auto sendSize = packet.size();
+					dataGram->getMessage().set(&packet, sendSize);
 					this->socket->send(dataGram);
 				}
 				else {

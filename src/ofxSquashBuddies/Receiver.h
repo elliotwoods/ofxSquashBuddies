@@ -2,6 +2,7 @@
 
 #include "ThingsInCommon.h"
 #include "FrameBuffer.h"
+#include "Utils.h"
 
 #include "ofThreadChannel.h"
 #include "ofEvent.h"
@@ -15,6 +16,9 @@ namespace ofxSquashBuddies {
 
 		bool init(int port);
 		void close();
+
+		int getPort() const;
+		ofxAsio::UDP::Server & getSocketServer();
 
 		void setCodec(const ofxSquash::Codec &) override;
 		const ofxSquash::Codec & getCodec() const override;
@@ -31,6 +35,7 @@ namespace ofxSquashBuddies {
 		bool receive(ofMesh &);
 
 		vector<DroppedFrame> getDroppedFrames() const;
+		float getIncomingFramerate() const;
 
 		ofEvent<Message> onMessageReceive;
 		ofEvent<Message> onMessageReceiveThreaded;
@@ -43,6 +48,7 @@ namespace ofxSquashBuddies {
 
 		thread socketThread[OFXSQUASHBUDDIES_RECEIVETHREADCOUNT];
 		void socketLoop();
+		int port = 0;
 		shared_ptr<ofxAsio::UDP::Server> socket;
 
 		FrameBufferSet frameBuffers;
@@ -55,5 +61,7 @@ namespace ofxSquashBuddies {
 		atomic_bool frameNew;
 		
 		vector<DroppedFrame> droppedFrames;
+		ofThreadChannel<chrono::high_resolution_clock::time_point> frameReceiverToFrameRateCalculator;
+		Utils::FramerateCounter incomingFrameRateCounter;
 	};
 }

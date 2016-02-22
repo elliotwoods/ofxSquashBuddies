@@ -36,6 +36,9 @@
     <ClInclude Include="..\src\ofxSquashBuddies\ThreadChannel.h">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Utils.h">
+      <Filter>src\ofxSquashBuddies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ofxSquashBuddies\FrameBuffer.cpp">
@@ -51,6 +54,9 @@
       <Filter>src\ofxSquashBuddies</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp">
+      <Filter>src\ofxSquashBuddies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\Utils.cpp">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClCompile>
   </ItemGroup>

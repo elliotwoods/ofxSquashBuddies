@@ -3,6 +3,7 @@
 #include "ThingsInCommon.h"
 
 #include "ThreadChannel.h"
+#include "Utils.h"
 
 #include "ofThreadChannel.h"
 #include "ofPixels.h"
@@ -15,7 +16,7 @@ namespace ofxSquashBuddies {
 		~Sender();
 		void init(string ipAddress, int port);
 		void close();
-
+		
 		void setCodec(const ofxSquash::Codec &) override;
 		const ofxSquash::Codec & getCodec() const override;
 
@@ -31,11 +32,15 @@ namespace ofxSquashBuddies {
 			this->send(&data, sizeof(PodType));
 		}
 
+		float getSendFramerate() const;
+
 		/// The sender will not send any frames to the compressor whilst the socket buffer's size is greater than maxSocketBufferSize
 		void setMaxSocketBufferSize(size_t maxSocketBufferSize);
 		size_t getMaxSocketBufferSize() const;
 		size_t getCurrentSocketBufferSize() const;
 
+		size_t getPacketSize() const;
+		void setPacketSize(size_t);
 	protected:
 		void compressLoop();
 		void socketLoop();
@@ -56,6 +61,9 @@ namespace ofxSquashBuddies {
 		} config;
 		mutex configMutex;
 
-		size_t maxSocketBufferSize = 200;
+		size_t maxSocketBufferSize = 300;
+		size_t packetSize = Packet::DefaultPacketSize;
+
+		Utils::FramerateCounter sendFramerateCounter;
 	};
 }
