@@ -92,7 +92,11 @@ namespace ofxSquashBuddies {
 				InfraredSize = 512 * 424 * 2,
 				BodyIndexSize = 512 * 424 * 1,
 				ColorCoordInDepthViewSize = 512 * 424 * 2 * 2,
-				SkeletonSize = ((7 * 4) + 1) * 20 * 6,
+
+				SkeletonBodyHeaderSize = 13,
+				SkeletonJointSize = 20 + 20,
+				SkeletonBodySize = SkeletonBodyHeaderSize + 20 * SkeletonJointSize,
+				SkeletonSize = SkeletonBodySize * 6 + 1,
 
 				TotalDataSize = ColorSize + DepthSize + InfraredSize + BodyIndexSize + ColorCoordInDepthViewSize + SkeletonSize
 			};

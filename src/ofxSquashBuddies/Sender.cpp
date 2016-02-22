@@ -16,9 +16,6 @@ namespace ofxSquashBuddies {
 	void Sender::init(string ipAddress, int port) {
 		this->close();
 
-		//CHECK IF INIT IS CALLED BEFORE USING THREAD CHANNELS!!!
-		//or will they not be used at all if init isn't called?
-
 		//recreate the thread channels
 		this->appToCompressor = make_shared<ofThreadChannel<Message>>();
 		this->compressorToSocket = make_shared<ThreadChannel<Packet>>();
