@@ -23,7 +23,7 @@ namespace ofxSquashBuddies {
 		void setCodec(const ofxSquash::Codec &) override;
 		const ofxSquash::Codec & getCodec() const override;
 
-		void update();
+		void update(const chrono::high_resolution_clock::duration & blockUntilNewFrameAvailable = chrono::milliseconds(0));
 
 		bool isFrameNew() const;
 

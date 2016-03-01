@@ -27,6 +27,7 @@ namespace ofxSquashBuddies {
 		//--
 		//
 		MultiTrack_2_2_Frame = 16,
+		MultiTrack_2_3_Frame = 17,
 		//
 		//--
 
@@ -105,6 +106,84 @@ namespace ofxSquashBuddies {
 				uint16_t headerSize = 4;
 				MessageType messageType = MessageType::MultiTrack_2_2_Frame;
 			};
+		};
+
+		struct MultiTrack_2_3_Frame {
+			enum Constants {
+				SkeletonSize = MultiTrack_2_2_Frame::Constants::SkeletonSize
+			};
+
+			enum DataAvailable : uint16_t {
+				Nothing = 0,
+				Color = 1 << 0,
+				Depth = 1 << 1,
+				Infrared = 1 << 2,
+				BodyIndex = 1 << 3,
+				ColorCoordInDepthView = 1 << 4,
+				Bodies = 1 << 5
+			};
+
+			enum PixelFormat : uint8_t {
+				Unknown  = 0,
+				RGB_8 = 1,
+				RGBA_8 = 2,
+				L_8 = 3,
+				L_16 = 4,
+				YUY2_8 = 5,
+				RG_16 = 6
+			};
+
+			struct FrameSettings {
+				size_t size() const;
+				uint16_t width;
+				uint16_t height;
+				PixelFormat pixelFormat;
+			};
+
+			struct {
+				uint16_t headerSize = 6;
+				MessageType messageType = MessageType::MultiTrack_2_3_Frame;
+				DataAvailable dataAvailable = DataAvailable::Nothing;
+			};
+
+			static size_t getBytesPerPixel(PixelFormat pixelFormat) {
+				switch (pixelFormat) {
+				case RGB_8:
+					return 3;
+				case RGBA_8:
+					return 4;
+				case L_8:
+					return 1;
+				case L_16:
+					return 2;
+				case YUY2_8:
+					return 2;
+				case RG_16:
+					return 4;
+				default:
+					return 0;
+				}
+			}
+
+			static ofPixelFormat toOf(PixelFormat pixelFormat) {
+				switch (pixelFormat) {
+				case RGB_8:
+					return ofPixelFormat::OF_PIXELS_RGB;
+				case RGBA_8:
+					return ofPixelFormat::OF_PIXELS_RGBA;
+				case L_8:
+					return ofPixelFormat::OF_PIXELS_GRAY;
+				case L_16:
+					return ofPixelFormat::OF_PIXELS_GRAY;
+				case YUY2_8:
+					return ofPixelFormat::OF_PIXELS_YUY2;
+				case RG_16:
+					return ofPixelFormat::OF_PIXELS_RG;
+				case Unknown:
+				default:
+					return ofPixelFormat::OF_PIXELS_UNKNOWN;
+				}
+			}
 		};
 	}
 

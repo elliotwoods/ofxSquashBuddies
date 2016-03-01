@@ -89,14 +89,26 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	void Receiver::update() {
+	void Receiver::update(const chrono::high_resolution_clock::duration & blockUntilNewFrameAvailable) {
 		bool newFrameReceived = false;
 
 		Message message;
-		while (this->frameReceiverToApp.tryReceive(message)) {
-			this->onMessageReceive.notify(this, message);
-			newFrameReceived = true;
+		{
+			//if we're supposed to block until there's something new, let's do that
+			if (blockUntilNewFrameAvailable != chrono::milliseconds(0)) {
+				if (this->frameReceiverToApp.tryReceive(message, chrono::duration_cast<chrono::milliseconds>(blockUntilNewFrameAvailable).count())) {
+					this->onMessageReceive.notify(this, message);
+					newFrameReceived = true;
+				}
+			}
+
+			//pull all remaining frames in the buffer
+			while (this->frameReceiverToApp.tryReceive(message)) {
+				this->onMessageReceive.notify(this, message);
+				newFrameReceived = true;
+			}
 		}
+		
 		if (newFrameReceived) {
 			this->message = message;
 			this->frameNew = true;

@@ -299,4 +299,9 @@ namespace ofxSquashBuddies {
 	const string & Message::getMessageString() const {
 		return this->headerAndBody;
 	}
+
+	//----------
+	size_t Header::MultiTrack_2_3_Frame::FrameSettings::size() const {
+		return this->width * this->height * getBytesPerPixel(this->pixelFormat);
+	}
 }
