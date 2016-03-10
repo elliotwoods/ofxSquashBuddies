@@ -28,6 +28,44 @@ Requirements
 * ofxSquash - https://github.com/elliotwoods/ofxSquash
 * ofxAddonLib - https://github.com/elliotwoods/ofxAddonLib (optional for Visual Studio, not required on other platforms)
 
+Usage
+=====
+
+Sending
+-------
+
+```c++
+//--------------------------------------------------------------
+void ofApp::setup(){
+	this->sender.init("127.0.0.1", 4444);
+}
+
+//--------------------------------------------------------------
+void ofApp::update(){
+	this->video.update();
+	if (this->video.isFrameNew()) {
+		this->sender.send(this->video.getPixels());
+	}
+}
+```
+
+Receiver
+-------
+
+```c++
+//--------------------------------------------------------------
+void ofApp::setup(){
+	this->receiver.init(4444);
+}
+
+//--------------------------------------------------------------
+void ofApp::update(){
+	if (this->receiver.isFrameNew()) {
+		this->receiver.receive(this->image.getPixels());
+	}
+}
+```
+
 Compatability
 =============
 
