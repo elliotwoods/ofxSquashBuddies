@@ -136,9 +136,9 @@ namespace ofxSquashBuddies {
 				if (packet.header.isLastPacket)
 				{
 					(* this->stream) << ofxSquash::Stream::Finish();
-					this->decompressorToFrameReceiver.send(move(this->message));
-					
-					lock.unlock();
+					lock.unlock(); //unlock the stream
+
+					this->decompressorToFrameReceiver.send(this->message);
 					this->clear();
 				}
 			}
@@ -235,7 +235,7 @@ namespace ofxSquashBuddies {
 
 		if (frameIndex < currentMinFrameIndex) {
 			//we're skipping backwards
-			if (frameIndex + 30 < currentMinFrameIndex) {
+			if (frameIndex + 30 > currentMinFrameIndex) {
 				//ignore up to 30 before the current active frame index
 				return true;
 			}

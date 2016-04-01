@@ -123,6 +123,8 @@ namespace ofxSquashBuddies {
 				Bodies = 1 << 5
 			};
 
+			typedef DataAvailable DataType;
+
 			enum PixelFormat : uint8_t {
 				Unknown  = 0,
 				RGB_8 = 1,
