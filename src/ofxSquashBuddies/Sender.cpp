@@ -157,6 +157,14 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
+	ofxAsio::UDP::EndPoint Sender::getEndPoint() {
+		this->configMutex.lock();
+		auto endPoint = this->config.endPoint;
+		this->configMutex.unlock();
+		return endPoint;
+	}
+
+	//----------
 	void Sender::compressLoop() {
 		uint32_t frameIndex = 0;
 		while (this->threadsRunning) {

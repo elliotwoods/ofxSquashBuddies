@@ -41,6 +41,8 @@ namespace ofxSquashBuddies {
 
 		size_t getPacketSize() const;
 		void setPacketSize(size_t);
+
+		ofxAsio::UDP::EndPoint getEndPoint();
 	protected:
 		void compressLoop();
 		void socketLoop();
