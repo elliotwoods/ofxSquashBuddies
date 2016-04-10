@@ -15,8 +15,12 @@ namespace ofxSquashBuddies {
 		//
 		String = 0,
 		Basic = 0, // String and Basic are the same thing (i.e. unformatted data)
+
 		Pixels = 1,
-		Mesh = 2,
+		ShortPixels = 2,
+		FloatPixels = 3,
+
+		Mesh = 8,
 		//
 		//--
 
@@ -53,16 +57,21 @@ namespace ofxSquashBuddies {
 
 		typedef Basic String;
 
-		struct Pixels {
+		template<MessageType PixelsMessageType>
+		struct Pixels_ {
 			struct {
 				uint16_t headerSize = 10;
-				MessageType messageType = MessageType::Pixels;
+				MessageType messageType = PixelsMessageType;
 
 				uint16_t width;
 				uint16_t height;
 				uint16_t pixelFormat;
 			};
 		};
+
+		typedef Pixels_<MessageType::Pixels> Pixels;
+		typedef Pixels_<MessageType::ShortPixels> ShortPixels;
+		typedef Pixels_<MessageType::FloatPixels> FloatPixels;
 
 		struct Mesh {
 			struct {
@@ -195,11 +204,15 @@ namespace ofxSquashBuddies {
 		Message(const string &);
 		Message(const void * data, size_t size);
 		Message(const ofPixels &);
+		Message(const ofShortPixels &);
+		Message(const ofFloatPixels &);
 		Message(const ofMesh &);
 		
 		void setData(const string &);
 		void setData(const void * data, size_t size);
 		void setData(const ofPixels &);
+		void setData(const ofShortPixels &);
+		void setData(const ofFloatPixels &);
 		void setData(const ofMesh &);
 
 		void clear();
@@ -207,6 +220,8 @@ namespace ofxSquashBuddies {
 		bool getData(string &) const;
 		bool getData(void * data, size_t & size) const; // size in = your buffer size, size out = how much of your buffer we're now using
 		bool getData(ofPixels &) const;
+		bool getData(ofShortPixels &);
+		bool getData(ofFloatPixels &);
 		bool getData(ofMesh &) const;
 
 		void pushData(const void * data, size_t size);

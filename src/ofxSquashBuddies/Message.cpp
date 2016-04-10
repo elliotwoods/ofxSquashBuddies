@@ -23,6 +23,16 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
+	Message::Message(const ofShortPixels & data) {
+		this->setData(data);
+	}
+
+	//----------
+	Message::Message(const ofFloatPixels & data) {
+		this->setData(data);
+	}
+
+	//----------
 	Message::Message(const ofMesh & data) {
 		this->setData(data);
 	}
@@ -49,6 +59,38 @@ namespace ofxSquashBuddies {
 		this->headerAndBody.resize(headerSize + bodySize);
 
 		auto & header = this->getHeader<Header::Pixels>(true);
+		header.width = data.getWidth();
+		header.height = data.getHeight();
+		header.pixelFormat = data.getPixelFormat();
+
+		auto body = this->getBodyData();
+		memcpy(body, data.getData(), bodySize);
+	}
+
+	//----------
+	void Message::setData(const ofShortPixels & data) {
+		const auto headerSize = sizeof(Header::ShortPixels);
+		const auto bodySize = data.size() * sizeof(uint16_t); // inner payload
+
+		this->headerAndBody.resize(headerSize + bodySize);
+
+		auto & header = this->getHeader<Header::ShortPixels>(true);
+		header.width = data.getWidth();
+		header.height = data.getHeight();
+		header.pixelFormat = data.getPixelFormat();
+
+		auto body = this->getBodyData();
+		memcpy(body, data.getData(), bodySize);
+	}
+
+	//----------
+	void Message::setData(const ofFloatPixels & data) {
+		const auto headerSize = sizeof(Header::FloatPixels);
+		const auto bodySize = data.size() * sizeof(float); // inner payload
+
+		this->headerAndBody.resize(headerSize + bodySize);
+
+		auto & header = this->getHeader<Header::FloatPixels>(true);
 		header.width = data.getWidth();
 		header.height = data.getHeight();
 		header.pixelFormat = data.getPixelFormat();
@@ -169,6 +211,54 @@ namespace ofxSquashBuddies {
 		}
 		else {
 			OFXSQUASHBUDDIES_WARNING << "Message Header doesn't match Pixels type";
+			return false;
+		}
+	}
+
+	//----------
+	bool Message::getData(ofShortPixels & data) {
+		if (this->hasHeader<Header::ShortPixels>()) {
+			const auto & header = this->getHeader<Header::ShortPixels>();
+			auto bodySize = this->getBodySize();
+			ofPixelFormat pixelFormat = (ofPixelFormat)header.pixelFormat;
+
+			//reallocate if we need to
+			data.allocate(header.width, header.headerSize, pixelFormat);
+			if (data.size() * sizeof(uint16_t) != bodySize) {
+				OFXSQUASHBUDDIES_ERROR << "Message body is of wrong size to fill pixels. Maybe a bug in sender?";
+				return false;
+			}
+			else {
+				memcpy(data.getData(), this->getBodyData(), bodySize);
+				return true;
+			}
+		}
+		else {
+			OFXSQUASHBUDDIES_WARNING << "Message Header doesn't match ShortPixels type";
+			return false;
+		}
+	}
+
+	//----------
+	bool Message::getData(ofFloatPixels & data) {
+		if (this->hasHeader<Header::FloatPixels>()) {
+			const auto & header = this->getHeader<Header::FloatPixels>();
+			auto bodySize = this->getBodySize();
+			ofPixelFormat pixelFormat = (ofPixelFormat)header.pixelFormat;
+
+			//reallocate if we need to
+			data.allocate(header.width, header.height, pixelFormat);
+			if (data.size() * sizeof(float) != bodySize) {
+				OFXSQUASHBUDDIES_ERROR << "Message body is of wrong size to fill pixels. Maybe a bug in sender?";
+				return false;
+			}
+			else {
+				memcpy(data.getData(), this->getBodyData(), bodySize);
+				return true;
+			}
+		}
+		else {
+			OFXSQUASHBUDDIES_WARNING << "Message Header doesn't match FloatPixels type";
 			return false;
 		}
 	}
