@@ -17,11 +17,13 @@ namespace ofxSquashBuddies {
 		this->close();
 
 		//recreate the thread channels
-		this->appToCompressor = make_shared<ofThreadChannel<Message>>();
+		this->appToCompressor = make_shared<ThreadChannel<Message>>();
 		this->compressorToSocket = make_shared<ThreadChannel<Packet>>();
 
 		try {
 			this->socket = make_unique<zmq::socket_t>(this->context, ZMQ_PUB);
+			int highWaterMark = 100;
+			this->socket->setsockopt(ZMQ_SNDHWM, &highWaterMark, sizeof(highWaterMark));
 			this->socket->bind("tcp://*:" + ofToString(port));
 		}
 		catch (std::exception & e) {
@@ -53,6 +55,10 @@ namespace ofxSquashBuddies {
 		}
 		if (this->socketThread.joinable()) {
 			this->socketThread.join();
+		}
+		if (this->socket) {
+			this->socket->close();
+			this->socket.reset();
 		}
 
 		this->appToCompressor.reset();
@@ -102,7 +108,7 @@ namespace ofxSquashBuddies {
 			return false;
 		}
 		else {
-			if (compressorToSocket->size() < this->maxSocketBufferSize) {
+			if (this->compressorToSocket->size() < this->maxSocketBufferSize && this->appToCompressor->size() < this->maxCompressorQueueSize) {
 				auto success = this->appToCompressor->send(move(message));
 				if (success) {
 					this->sendFramerateCounter.addFrame();
@@ -137,6 +143,21 @@ namespace ofxSquashBuddies {
 	//----------
 	size_t Publisher::getCurrentSocketBufferSize() const {
 		return this->compressorToSocket->size();
+	}
+
+	//----------
+	void Publisher::setMaxCompressorQueueSize(size_t maxCompressorQueueSize) {
+		this->maxCompressorQueueSize = maxCompressorQueueSize;
+	}
+
+	//----------
+	size_t Publisher::getMaxCompressorQueueSize() const {
+		return this->maxCompressorQueueSize;
+	}
+
+	//----------
+	size_t Publisher::getCurrentCompressorQueueSize() const {
+		return this->appToCompressor->size();
 	}
 
 	//----------

@@ -39,6 +39,10 @@ namespace ofxSquashBuddies {
 		size_t getMaxSocketBufferSize() const;
 		size_t getCurrentSocketBufferSize() const;
 
+		void setMaxCompressorQueueSize(size_t maxCompressorQueueSize);
+		size_t getMaxCompressorQueueSize() const;
+		size_t getCurrentCompressorQueueSize() const;
+
 		size_t getPacketSize() const;
 		void setPacketSize(size_t);
 
@@ -55,9 +59,10 @@ namespace ofxSquashBuddies {
 		std::thread compressThread;
 		std::thread socketThread;
 
-		shared_ptr<ofThreadChannel<Message>> appToCompressor;
+		shared_ptr<ThreadChannel<Message>> appToCompressor;
 		shared_ptr<ThreadChannel<Packet>> compressorToSocket;
 
+		size_t maxCompressorQueueSize = 1;
 		size_t maxSocketBufferSize = 300;
 		size_t packetSize = Packet::DefaultPacketSize;
 

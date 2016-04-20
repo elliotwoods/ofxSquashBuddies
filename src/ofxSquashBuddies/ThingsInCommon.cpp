@@ -8,7 +8,7 @@ namespace ofxSquashBuddies {
 
 	//----------
 	ofxSquash::Codec ThingsInCommon::getDefaultCodec() {
-		auto codec = ofxSquash::Codec("density");
+		auto codec = ofxSquash::Codec("lz4");
 		return codec;
 	}
 }
