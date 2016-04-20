@@ -24,8 +24,8 @@
     <ClInclude Include="..\src\ofxSquashBuddies\FrameBuffer.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Message.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Packet.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\Sender.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\Subscriber.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\Publisher.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\ThreadChannel.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Utils.h" />
@@ -33,8 +33,8 @@
   <ItemGroup>
     <ClCompile Include="..\src\ofxSquashBuddies\FrameBuffer.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\Message.cpp" />
-    <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp" />
-    <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp" />
+    <ClCompile Include="..\src\ofxSquashBuddies\Subscriber.cpp" />
+    <ClCompile Include="..\src\ofxSquashBuddies\Publisher.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\Utils.cpp" />
   </ItemGroup>

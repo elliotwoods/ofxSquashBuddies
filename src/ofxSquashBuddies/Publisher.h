@@ -10,11 +10,11 @@
 #include "ofMesh.h"
 
 namespace ofxSquashBuddies {
-	class Sender : public ThingsInCommon {
+	class Publisher : public ThingsInCommon {
 	public:
-		Sender();
-		~Sender();
-		void init(string ipAddress, int port);
+		Publisher();
+		~Publisher();
+		void init(int port);
 		void close();
 		
 		void setCodec(const ofxSquash::Codec &) override;
@@ -42,26 +42,21 @@ namespace ofxSquashBuddies {
 		size_t getPacketSize() const;
 		void setPacketSize(size_t);
 
-		ofxAsio::UDP::EndPoint getEndPoint();
 	protected:
 		void compressLoop();
 		void socketLoop();
 
 		ofxSquash::Codec codec;
 
+		zmq::context_t context;
+		unique_ptr<zmq::socket_t> socket;
+
 		bool threadsRunning = false;
 		std::thread compressThread;
 		std::thread socketThread;
 
-		shared_ptr<ofxAsio::UDP::Client> socket;
-
 		shared_ptr<ofThreadChannel<Message>> appToCompressor;
 		shared_ptr<ThreadChannel<Packet>> compressorToSocket;
-
-		struct Config {
-			ofxAsio::UDP::EndPoint endPoint;
-		} config;
-		mutex configMutex;
 
 		size_t maxSocketBufferSize = 300;
 		size_t packetSize = Packet::DefaultPacketSize;

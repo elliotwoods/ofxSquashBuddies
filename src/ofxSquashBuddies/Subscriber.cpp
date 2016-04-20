@@ -1,27 +1,28 @@
-#include "Receiver.h"
+#include "Subscriber.h"
 
 namespace ofxSquashBuddies {
 #pragma mark public
 	//---------
-	Receiver::Receiver() {
+	Subscriber::Subscriber() {
 		this->setCodec(this->getDefaultCodec());
 	}
 
 	//---------
-	Receiver::~Receiver() {
+	Subscriber::~Subscriber() {
 		this->close();
 	}
 
 	//---------
-	bool Receiver::init(int port) {
+	bool Subscriber::init(string address, int port) {
 		this->close();
 
 		try {
-			this->socket = make_shared<ofxAsio::UDP::Server>(port);
-			this->port = port;
+			this->socket = make_unique<zmq::socket_t>(this->context, ZMQ_SUB);
+			this->socket->connect("tcp://" + address + ":" + ofToString(port));
+			this->socket->setsockopt(ZMQ_SUBSCRIBE, "", 0);
 		}
 		catch (std::exception & e) {
-			OFXSQUASH_ERROR << "Failed to open Receiver on port " << port << " : " << e.what();
+			OFXSQUASH_ERROR << "Failed subscribe to " << address << ":" << port << " : " << e.what();
 			return false;
 		}
 
@@ -29,11 +30,9 @@ namespace ofxSquashBuddies {
 		this->frameBuffers.decompressorToFrameReceiver.reset();
 
 		this->threadsRunning = true;
-		for (int i = 0; i < OFXSQUASHBUDDIES_RECEIVETHREADCOUNT; i++) {
-			this->socketThread[i] = thread([this]() {
-				this->socketLoop();
-			});
-		}
+		this->socketThread = thread([this]() {
+			this->socketLoop();
+		});
 		this->frameReceiverThread = thread([this]() {
 			this->frameReceiverLoop();
 		});
@@ -42,17 +41,15 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	void Receiver::close() {
+	void Subscriber::close() {
 		this->threadsRunning = false;
 
 		//close socketThread
 		if (this->socket) {
 			this->socket->close();
 		}
-		for (int i = 0; i < OFXSQUASHBUDDIES_RECEIVETHREADCOUNT; i++) {
-			if (this->socketThread[i].joinable()) {
-				this->socketThread[i].join();
-			}
+		if (this->socketThread.joinable()) {
+			this->socketThread.join();
 		}
 		if (this->socket) {
 			this->socket.reset();
@@ -63,33 +60,21 @@ namespace ofxSquashBuddies {
 		if (this->frameReceiverThread.joinable()) {
 			this->frameReceiverThread.join();
 		}
-
-		this->port = 0;
-	}
-
-	//----------
-	int Receiver::getPort() const {
-		return this->port;
-	}
-
-	//----------
-	ofxAsio::UDP::Server & Receiver::getSocketServer() {
-		return *this->socket;
 	}
 
 	//---------
-	void Receiver::setCodec(const ofxSquash::Codec & codec) {
+	void Subscriber::setCodec(const ofxSquash::Codec & codec) {
 		this->codec = codec;
 		this->frameBuffers.setCodec(this->codec);
 	}
 
 	//---------
-	const ofxSquash::Codec & Receiver::getCodec() const {
+	const ofxSquash::Codec & Subscriber::getCodec() const {
 		return this->codec;
 	}
 
 	//---------
-	void Receiver::update(const chrono::high_resolution_clock::duration & blockUntilNewFrameAvailable) {
+	void Subscriber::update(const chrono::high_resolution_clock::duration & blockUntilNewFrameAvailable) {
 		bool newFrameReceived = false;
 
 		Message message;
@@ -135,18 +120,18 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	bool Receiver::isFrameNew() const
+	bool Subscriber::isFrameNew() const
 	{
 		return this->frameNew;
 	}
 
 	//---------
-	const Message & Receiver::getMessage() const {
+	const Message & Subscriber::getMessage() const {
 		return this->message;
 	}
 
 	//---------
-	Message Receiver::getNextMessage(uint64_t timeoutMS) {
+	Message Subscriber::getNextMessage(uint64_t timeoutMS) {
 		Message message;
 		if (this->frameReceiverToApp.tryReceive(message, timeoutMS)) {
 			this->message = message;
@@ -156,7 +141,7 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	bool Receiver::receive(string & data) {
+	bool Subscriber::receive(string & data) {
 		if (this->message.empty()) {
 			OFXSQUASHBUDDIES_WARNING << "Cannot receive. Message is empty";
 			return false;
@@ -167,7 +152,7 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	bool Receiver::receive(ofPixels & data) {
+	bool Subscriber::receive(ofPixels & data) {
 		if (this->message.empty()) {
 			OFXSQUASHBUDDIES_WARNING << "Cannot receive. Message is empty";
 			return false;
@@ -178,7 +163,7 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	bool Receiver::receive(ofMesh & data) {
+	bool Subscriber::receive(ofMesh & data) {
 		if (this->message.empty()) {
 			OFXSQUASHBUDDIES_WARNING << "Cannot receive. Message is empty";
 			return false;
@@ -189,33 +174,42 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	vector<DroppedFrame> Receiver::getDroppedFrames() const {
+	vector<DroppedFrame> Subscriber::getDroppedFrames() const {
 		return this->droppedFrames;
 	}
 
 	//----------
-	float Receiver::getIncomingFramerate() const {
+	float Subscriber::getIncomingFramerate() const {
 		return this->incomingFrameRateCounter.getFrameRate();
 	}
 
 #pragma mark protected
 	//---------
-	void Receiver::asyncCallback(shared_ptr<ofxAsio::UDP::DataGram> dataGram) {
+	void Subscriber::asyncCallback(shared_ptr<ofxAsio::UDP::DataGram> dataGram) {
 		this->frameBuffers.socketToFrameBuffers.send(dataGram);
 	}
 
 	//---------
-	void Receiver::socketLoop() {
+	void Subscriber::socketLoop() {
 		while (this->threadsRunning) {
-			auto dataGram = socket->receive(Packet::PacketAllocationSize * 2);
-			if (dataGram) {
-				this->frameBuffers.socketToFrameBuffers.send(dataGram);
+			if (this->socket) {
+				auto dataGram = make_shared<ofxAsio::DataGram>();
+				auto & message = dataGram->getMessage();
+
+				message.resize(Packet::PacketAllocationSize * 2);
+				auto receivedSize = this->socket->recv(message.data(), message.size(), 0);
+				if (receivedSize > 0) {
+					this->frameBuffers.socketToFrameBuffers.send(dataGram);
+				}
+			}
+			else {
+				OFXSQUASHBUDDIES_WARNING << "Socket not connected, cannot receive packets.";
 			}
 		}
 	}
 
 	//---------
-	void Receiver::frameReceiverLoop() {
+	void Subscriber::frameReceiverLoop() {
 		while (this->threadsRunning) {
 			Message message;
 			if (this->frameBuffers.decompressorToFrameReceiver.receive(message)) {

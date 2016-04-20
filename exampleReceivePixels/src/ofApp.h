@@ -22,7 +22,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-		ofxSquashBuddies::Receiver receiver;
+		ofxSquashBuddies::Subscriber subscriber;
 
 		ofImage image;
 };

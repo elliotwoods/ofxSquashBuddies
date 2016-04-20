@@ -7,18 +7,14 @@
 #include "ofThreadChannel.h"
 #include "ofEvent.h"
 
-#define OFXSQUASHBUDDIES_RECEIVETHREADCOUNT 3
 namespace ofxSquashBuddies {
-	class Receiver : public ThingsInCommon {
+	class Subscriber : public ThingsInCommon {
 	public:
-		Receiver();
-		~Receiver();
-
-		bool init(int port);
+		Subscriber();
+		~Subscriber();
+			
+		bool init(string address, int port);
 		void close();
-
-		int getPort() const;
-		ofxAsio::UDP::Server & getSocketServer();
 
 		void setCodec(const ofxSquash::Codec &) override;
 		const ofxSquash::Codec & getCodec() const override;
@@ -46,10 +42,11 @@ namespace ofxSquashBuddies {
 
 		ofxSquash::Codec codec;
 
-		thread socketThread[OFXSQUASHBUDDIES_RECEIVETHREADCOUNT];
+		thread socketThread;
 		void socketLoop();
-		int port = 0;
-		shared_ptr<ofxAsio::UDP::Server> socket;
+
+		zmq::context_t context;
+		shared_ptr<zmq::socket_t> socket;
 
 		FrameBufferSet frameBuffers;
 

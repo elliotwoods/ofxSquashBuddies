@@ -4,18 +4,17 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	auto port = 4444;
-	string ipAddress = "127.0.0.1";
+	auto port = 5000;
 
-	auto result = ofSystemTextBoxDialog("Target IP Address (Default : " + ipAddress + ")");
+	auto result = ofSystemTextBoxDialog("Listening port (Default : " + ofToString(port) + ")");
 	if (!result.empty()) {
-		ipAddress = result;
+		port = ofToInt(result);
 	}
 
-	this->sender.init(ipAddress, port);
+	this->sender.init(port);
 
 
-	ofSetWindowTitle("Sending to : " + ipAddress + ":" + ofToString(port));
+	ofSetWindowTitle("Publishing on : " + ofToString(port));
 	ofSetFrameRate(60);
 	this->video.initGrabber(1280, 720);
 }

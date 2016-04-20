@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets">
     <Import Project="..\..\ofxSquash\ofxSquashLib\ofxSquash.props" />
+    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
     <Import Project="..\..\ofxAsio\ofxAsioLib\ofxAsio.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />

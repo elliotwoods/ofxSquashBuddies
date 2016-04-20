@@ -1,30 +1,31 @@
-#include "Sender.h"
+#include "Publisher.h"
 #include "Constants.h"
 
 namespace ofxSquashBuddies {
 	//----------
-	Sender::Sender() {
+	Publisher::Publisher() {
 		this->setCodec(this->getDefaultCodec());
 	}
 
 	//----------
-	Sender::~Sender() {
+	Publisher::~Publisher() {
 		this->close();
 	}
 
 	//----------
-	void Sender::init(string ipAddress, int port) {
+	void Publisher::init(int port) {
 		this->close();
 
 		//recreate the thread channels
 		this->appToCompressor = make_shared<ofThreadChannel<Message>>();
 		this->compressorToSocket = make_shared<ThreadChannel<Packet>>();
 
-		this->socket = make_shared<ofxAsio::UDP::Client>();
-
-		{
-			auto lock = unique_lock<mutex>(this->configMutex);
-			this->config.endPoint = ofxAsio::UDP::EndPoint(ipAddress, port);
+		try {
+			this->socket = make_unique<zmq::socket_t>(this->context, ZMQ_PUB);
+			this->socket->bind("tcp://*:" + ofToString(port));
+		}
+		catch (std::exception & e) {
+			OFXSQUASH_ERROR << "Failed to Publish on port " << port << " : " << e.what();
 		}
 
 		this->threadsRunning = true;
@@ -37,7 +38,7 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	void Sender::close() {
+	void Publisher::close() {
 		this->threadsRunning = false;
 
 		if (this->appToCompressor) {
@@ -59,43 +60,43 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	void Sender::setCodec(const ofxSquash::Codec & codec) {
+	void Publisher::setCodec(const ofxSquash::Codec & codec) {
 		this->codec = codec;
 	}
 
 	//----------
-	const ofxSquash::Codec & Sender::getCodec() const {
+	const ofxSquash::Codec & Publisher::getCodec() const {
 		return this->codec;
 	}
 
 	//----------
-	bool Sender::send(const void * data, size_t size) {
+	bool Publisher::send(const void * data, size_t size) {
 		return this->send(move(Message(data, size)));
 	}
 
 	//----------
-	bool Sender::send(const string & data) {
+	bool Publisher::send(const string & data) {
 		return this->send(move(Message(data)));
 	}
 
 	//----------
-	bool Sender::send(const ofPixels & data) {
+	bool Publisher::send(const ofPixels & data) {
 		return this->send(move(Message(data)));
 	}
 
 	//----------
-	bool Sender::send(const ofMesh & data) {
+	bool Publisher::send(const ofMesh & data) {
 		return this->send(move(Message(data)));
 	}
 
 	//----------
-	bool Sender::send(const Message & message) {
+	bool Publisher::send(const Message & message) {
 		auto messageCopy = message;
 		return this->send(move(messageCopy));
 	}
 
 	//----------
-	bool Sender::send(Message && message) {
+	bool Publisher::send(Message && message) {
 		if (!this->appToCompressor) {
 			OFXSQUASHBUDDIES_ERROR << "You cannot call send before you call init";
 			return false;
@@ -119,32 +120,32 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	float Sender::getSendFramerate() const {
+	float Publisher::getSendFramerate() const {
 		return this->sendFramerateCounter.getFrameRate();
 	}
 
 	//----------
-	void Sender::setMaxSocketBufferSize(size_t maxSocketBufferSize) {
+	void Publisher::setMaxSocketBufferSize(size_t maxSocketBufferSize) {
 		this->maxSocketBufferSize = maxSocketBufferSize;
 	}
 
 	//----------
-	size_t Sender::getMaxSocketBufferSize() const {
+	size_t Publisher::getMaxSocketBufferSize() const {
 		return this->maxSocketBufferSize;
 	}
 
 	//----------
-	size_t Sender::getCurrentSocketBufferSize() const {
+	size_t Publisher::getCurrentSocketBufferSize() const {
 		return this->compressorToSocket->size();
 	}
 
 	//----------
-	size_t Sender::getPacketSize() const {
+	size_t Publisher::getPacketSize() const {
 		return this->packetSize;
 	}
 
 	//----------
-	void Sender::setPacketSize(size_t packetSize) {
+	void Publisher::setPacketSize(size_t packetSize) {
 		if (packetSize > Packet::PacketAllocationSize) {
 			OFXSQUASHBUDDIES_WARNING << "Cannot set packet size to [" << packetSize << "] as it is higher than Packet::PacketSize";
 			packetSize = Packet::PacketAllocationSize;
@@ -157,15 +158,7 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	ofxAsio::UDP::EndPoint Sender::getEndPoint() {
-		this->configMutex.lock();
-		auto endPoint = this->config.endPoint;
-		this->configMutex.unlock();
-		return endPoint;
-	}
-
-	//----------
-	void Sender::compressLoop() {
+	void Publisher::compressLoop() {
 		uint32_t frameIndex = 0;
 		while (this->threadsRunning) {
 			Message message;
@@ -246,21 +239,16 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	void Sender::socketLoop() {
+	void Publisher::socketLoop() {
 		while (this->threadsRunning) {
-			this->configMutex.lock();
-			Config config = this->config;
-			this->configMutex.unlock();
 
 			Packet packet;
 			while (this->compressorToSocket->receive(packet)) {
 				if (this->socket) {
-					auto dataGram = make_shared<ofxAsio::UDP::DataGram>();
-					dataGram->setEndPoint(config.endPoint);
+					zmq::message_t message(packet.size());
+					memcpy(message.data(), &packet, packet.size());
 
-					auto sendSize = packet.size();
-					dataGram->getMessage().set(&packet, sendSize);
-					this->socket->send(dataGram);
+					this->socket->send(message);
 				}
 				else {
 					OFXSQUASHBUDDIES_WARNING << "Socket not connected, cannot send packets.";

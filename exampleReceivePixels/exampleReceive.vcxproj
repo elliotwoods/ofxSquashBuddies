@@ -53,24 +53,32 @@
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksRelease.props" />
     <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
     <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
+    <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
+    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksRelease.props" />
     <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
     <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
+    <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
+    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksDebug.props" />
     <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
     <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
+    <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
+    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksDebug.props" />
     <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
     <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
+    <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
+    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -180,23 +188,10 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\ofxSquashBuddies\FrameBuffer.cpp" />
-    <ClCompile Include="..\src\ofxSquashBuddies\Message.cpp" />
-    <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp" />
-    <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp" />
-    <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\ofxSquashBuddies.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\Constants.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\FrameBuffer.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\Message.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\Packet.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\Sender.h" />
-    <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h" />
     <ClInclude Include="src\ofApp.h" />
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +203,12 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsioLib.vcxproj">
       <Project>{25c92b0b-e070-47be-a6a7-665ce9713e3a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ofxZmq\ofxZmqLib\ofxZmqLib.vcxproj">
+      <Project>{3f7cd569-f3e4-4c44-991d-01eb9037794e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ofxSquashBuddiesLib\ofxSquashBuddies.vcxproj">
+      <Project>{1ac26b68-becb-44e7-89f4-210ae5e4c06c}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

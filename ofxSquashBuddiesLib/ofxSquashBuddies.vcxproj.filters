@@ -24,12 +24,6 @@
     <ClInclude Include="..\src\ofxSquashBuddies\Packet.h">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h">
-      <Filter>src\ofxSquashBuddies</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ofxSquashBuddies\Sender.h">
-      <Filter>src\ofxSquashBuddies</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClInclude>
@@ -37,6 +31,12 @@
       <Filter>src\ofxSquashBuddies</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxSquashBuddies\Utils.h">
+      <Filter>src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Publisher.h">
+      <Filter>src\ofxSquashBuddies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxSquashBuddies\Subscriber.h">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,16 +47,16 @@
     <ClCompile Include="..\src\ofxSquashBuddies\Message.cpp">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp">
-      <Filter>src\ofxSquashBuddies</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp">
-      <Filter>src\ofxSquashBuddies</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ofxSquashBuddies\Utils.cpp">
+      <Filter>src\ofxSquashBuddies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\Publisher.cpp">
+      <Filter>src\ofxSquashBuddies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxSquashBuddies\Subscriber.cpp">
       <Filter>src\ofxSquashBuddies</Filter>
     </ClCompile>
   </ItemGroup>

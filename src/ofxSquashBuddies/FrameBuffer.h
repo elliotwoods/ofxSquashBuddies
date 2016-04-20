@@ -81,7 +81,7 @@ namespace ofxSquashBuddies {
 		FrameBuffer & getFrameBuffer(uint32_t frameIndex);
 		bool isExpired(uint32_t frameIndex) const;
 
-		ofThreadChannel<shared_ptr<ofxAsio::UDP::DataGram>> socketToFrameBuffers;
+		ofThreadChannel<shared_ptr<ofxAsio::DataGram>> socketToFrameBuffers;
 		ThreadChannel<Message> decompressorToFrameReceiver;
 		ofThreadChannel<DroppedFrame> droppedFrames;
 	protected:

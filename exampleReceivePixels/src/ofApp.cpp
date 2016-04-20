@@ -4,18 +4,35 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	auto port = 4444;
-	this->receiver.init(port);
+	auto port = 5000;
+	string address = "localhost";
 
-	ofSetWindowTitle("Receiving : " + ofToString(port));
+	{
+		auto result = ofSystemTextBoxDialog("Subscribe to address (Default : " + address + ")");
+		if (!result.empty()) {
+			address = result;
+		}
+	}
+
+	{
+		auto result = ofSystemTextBoxDialog("Subscribe to port (Default : " + ofToString(port) + ")");
+		if (!result.empty()) {
+			port = ofToInt(result);
+		}
+	}
+	
+
+	this->subscriber.init(address, port);
+
+	ofSetWindowTitle("Subscribing : " + address + ":" + ofToString(port));
 	ofSetFrameRate(60);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	this->receiver.update();
-	if (this->receiver.isFrameNew()) {
-		this->receiver.receive(this->image.getPixels());
+	this->subscriber.update();
+	if (this->subscriber.isFrameNew()) {
+		this->subscriber.receive(this->image.getPixels());
 		this->image.update();
 	}
 }

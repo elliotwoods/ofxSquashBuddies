@@ -252,7 +252,7 @@ namespace ofxSquashBuddies {
 	//---------
 	void FrameBufferSet::dataGramProcessorLoop() {
 		while (this->threadRunning) {
-			shared_ptr<ofxAsio::UDP::DataGram> dataGram;
+			shared_ptr<ofxAsio::DataGram> dataGram;
 			while (this->socketToFrameBuffers.receive(dataGram)) {
 				auto & message = dataGram->getMessage();
 				if (message.empty()) {

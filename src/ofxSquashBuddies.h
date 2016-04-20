@@ -1,4 +1,4 @@
 #pragma once
 
-#include "ofxSquashBuddies/Sender.h"
-#include "ofxSquashBuddies/Receiver.h"
+#include "ofxSquashBuddies/Publisher.h"
+#include "ofxSquashBuddies/Subscriber.h"
