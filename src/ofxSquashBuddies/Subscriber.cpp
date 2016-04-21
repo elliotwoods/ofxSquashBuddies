@@ -28,6 +28,9 @@ namespace ofxSquashBuddies {
 			return false;
 		}
 
+		this->address = address;
+		this->port = port;
+
 		this->frameBuffers.setCodec(this->codec);
 		this->frameBuffers.decompressorToFrameReceiver.reset();
 
@@ -57,11 +60,24 @@ namespace ofxSquashBuddies {
 			this->socket.reset();
 		}
 
+		this->address = "";
+		this->port = -1;
+
 		//close frameReceiverThread
 		this->frameBuffers.decompressorToFrameReceiver.close();
 		if (this->frameReceiverThread.joinable()) {
 			this->frameReceiverThread.join();
 		}
+	}
+
+	//---------
+	const string & Subscriber::getAddress() const {
+		return this->address;
+	}
+	
+	//---------
+	int Subscriber::getPort() const {
+		return this->port;
 	}
 
 	//---------

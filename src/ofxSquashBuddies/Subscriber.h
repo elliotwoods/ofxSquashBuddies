@@ -16,6 +16,9 @@ namespace ofxSquashBuddies {
 		bool init(string address, int port);
 		void close();
 
+		const string & getAddress() const;
+		int getPort() const;
+
 		void setCodec(const ofxSquash::Codec &) override;
 		const ofxSquash::Codec & getCodec() const override;
 
@@ -37,6 +40,9 @@ namespace ofxSquashBuddies {
 		ofEvent<Message> onMessageReceiveThreaded;
 	protected:
 		void asyncCallback(shared_ptr<ofxAsio::UDP::DataGram>);
+
+		string address;
+		int port;
 
 		atomic_bool threadsRunning;
 
