@@ -30,6 +30,8 @@ namespace ofxSquashBuddies {
 			OFXSQUASH_ERROR << "Failed to Publish on port " << port << " : " << e.what();
 		}
 
+		this->port = port;
+
 		this->threadsRunning = true;
 		this->compressThread = thread([this]() {
 			this->compressLoop();
@@ -61,8 +63,15 @@ namespace ofxSquashBuddies {
 			this->socket.reset();
 		}
 
+		this->port = -1;
+
 		this->appToCompressor.reset();
 		this->compressorToSocket.reset();
+	}
+
+	//---------
+	int Publisher::getPort() const {
+		return this->port;
 	}
 
 	//----------
