@@ -22,7 +22,7 @@ namespace ofxSquashBuddies {
 
 		try {
 			this->socket = make_unique<zmq::socket_t>(this->context, ZMQ_PUB);
-			int highWaterMark = 100;
+			int highWaterMark = 1000;
 			this->socket->setsockopt(ZMQ_SNDHWM, &highWaterMark, sizeof(highWaterMark));
 			this->socket->bind("tcp://*:" + ofToString(port));
 		}

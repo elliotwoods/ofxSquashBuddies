@@ -18,7 +18,7 @@ namespace ofxSquashBuddies {
 
 		try {
 			this->socket = make_unique<zmq::socket_t>(this->context, ZMQ_SUB);
-			int highWaterMark = 100;
+			int highWaterMark = 1000;
 			this->socket->setsockopt(ZMQ_RCVHWM, &highWaterMark, sizeof(highWaterMark)); 
 			this->socket->connect("tcp://" + address + ":" + ofToString(port));
 			this->socket->setsockopt(ZMQ_SUBSCRIBE, "", 0);
@@ -50,9 +50,6 @@ namespace ofxSquashBuddies {
 		this->threadsRunning = false;
 
 		//close socketThread
-		if (this->socket) {
-			this->socket->close();
-		}
 		if (this->socketThread.joinable()) {
 			this->socketThread.join();
 		}
@@ -124,24 +121,24 @@ namespace ofxSquashBuddies {
 		this->droppedFrames.clear();
 		DroppedFrame droppedFrame;
 		while (this->frameBuffers.droppedFrames.tryReceive(droppedFrame)) {
-// 			switch (droppedFrame.reason) {
-// 			case ofxSquashBuddies::DroppedFrame::Reason::DroppedPackets:
-// 				cout << "Dropped packets" << endl;
-// 				break;
-// 			case ofxSquashBuddies::DroppedFrame::Reason::SkippedFrame:
-// 			{
-// 				cout << "Skipped frame" << endl;
-// 				cout << "Current active frame buffers : ";
-// 				auto frameBuffers = this->frameBuffers.getFrameBuffers();
-// 				for (auto frameBuffer : frameBuffers) {
-// 					cout << frameBuffer->getFrameIndex() << ", ";
-// 				}
-// 				cout << endl;
-// 				break;
-// 			}
-// 			default:
-// 				cout << "Unknown" << endl;
-// 			}
+			switch (droppedFrame.reason) {
+			case ofxSquashBuddies::DroppedFrame::Reason::DroppedPackets:
+				cout << "Dropped packets [" << droppedFrame.lastPacketIndex << "/" << droppedFrame.packetCount << "]" << endl;
+				break;
+			case ofxSquashBuddies::DroppedFrame::Reason::SkippedFrame:
+			{
+				cout << "Skipped frame" << endl;
+				cout << "Current active frame buffers : ";
+				auto frameBuffers = this->frameBuffers.getFrameBuffers();
+				for (auto frameBuffer : frameBuffers) {
+					cout << frameBuffer->getFrameIndex() << ", ";
+				}
+				cout << endl;
+				break;
+			}
+			default:
+				cout << "Unknown" << endl;
+			}
 			this->droppedFrames.push_back(move(droppedFrame));
 			
 		}
@@ -234,7 +231,7 @@ namespace ofxSquashBuddies {
 				auto & message = dataGram->getMessage();
 
 				message.resize(Packet::PacketAllocationSize * 2);
-				auto receivedSize = this->socket->recv(message.data(), message.size(), 0);
+				auto receivedSize = this->socket->recv(message.data(), message.size(), ZMQ_DONTWAIT);
 				if (receivedSize > 0) {
 					this->frameBuffers.socketToFrameBuffers.send(dataGram);
 				}
