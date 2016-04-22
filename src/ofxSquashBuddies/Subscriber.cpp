@@ -121,26 +121,7 @@ namespace ofxSquashBuddies {
 		this->droppedFrames.clear();
 		DroppedFrame droppedFrame;
 		while (this->frameBuffers.droppedFrames.tryReceive(droppedFrame)) {
-			switch (droppedFrame.reason) {
-			case ofxSquashBuddies::DroppedFrame::Reason::DroppedPackets:
-				cout << "Dropped packets [" << droppedFrame.lastPacketIndex << "/" << droppedFrame.packetCount << "]" << endl;
-				break;
-			case ofxSquashBuddies::DroppedFrame::Reason::SkippedFrame:
-			{
-				cout << "Skipped frame" << endl;
-				cout << "Current active frame buffers : ";
-				auto frameBuffers = this->frameBuffers.getFrameBuffers();
-				for (auto frameBuffer : frameBuffers) {
-					cout << frameBuffer->getFrameIndex() << ", ";
-				}
-				cout << endl;
-				break;
-			}
-			default:
-				cout << "Unknown" << endl;
-			}
 			this->droppedFrames.push_back(move(droppedFrame));
-			
 		}
 
 		//add incoming fps to frame rate timer, and update the frame rate
@@ -210,6 +191,22 @@ namespace ofxSquashBuddies {
 	//---------
 	vector<DroppedFrame> Subscriber::getDroppedFrames() const {
 		return this->droppedFrames;
+	}
+
+	//----------
+	void Subscriber::printDebug(const DroppedFrame & droppedFrame) {
+		switch (droppedFrame.reason) {
+		case ofxSquashBuddies::DroppedFrame::Reason::DroppedPackets:
+			cout << "Dropped packets [" << droppedFrame.lastPacketIndex << "/" << droppedFrame.packetCount << "]" << endl;
+			break;
+		case ofxSquashBuddies::DroppedFrame::Reason::SkippedFrame:
+		{
+			cout << "Skipped frame" << endl;
+			break;
+		}
+		default:
+			cout << "Unknown" << endl;
+		}
 	}
 
 	//----------

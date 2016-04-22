@@ -79,8 +79,8 @@ namespace ofxSquashBuddies {
 		{
 			auto lock = unique_lock<mutex>(this->packetsMutex);
 
-			if (!this->success) {
-				//We cleared before all our packets were processed
+			if (!this->success && this->frameIndex != 0) {
+				//We cleared before all our packets were processed, and we are an active frame
 				//Create some debug info and report back.
 				size_t droppedPackets = 0;
 

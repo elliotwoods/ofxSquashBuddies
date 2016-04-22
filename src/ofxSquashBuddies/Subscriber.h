@@ -34,6 +34,8 @@ namespace ofxSquashBuddies {
 		bool receive(ofMesh &);
 
 		vector<DroppedFrame> getDroppedFrames() const;
+		static void printDebug(const DroppedFrame &);
+
 		float getIncomingFramerate() const;
 
 		ofEvent<Message> onMessageReceive;
