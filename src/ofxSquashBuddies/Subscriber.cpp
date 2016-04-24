@@ -18,7 +18,7 @@ namespace ofxSquashBuddies {
 
 		try {
 			this->socket = make_unique<zmq::socket_t>(this->context, ZMQ_SUB);
-			int highWaterMark = 1000;
+			int highWaterMark = 3000;
 			this->socket->setsockopt(ZMQ_RCVHWM, &highWaterMark, sizeof(highWaterMark)); 
 			this->socket->connect("tcp://" + address + ":" + ofToString(port));
 			this->socket->setsockopt(ZMQ_SUBSCRIBE, "", 0);

@@ -103,8 +103,11 @@ namespace ofxSquashBuddies {
 				BodyIndexSize = 512 * 424 * 1,
 				ColorCoordInDepthViewSize = 512 * 424 * 2 * 2,
 
-				SkeletonBodyHeaderSize = 13,
-				SkeletonJointSize = 20 + 20,
+				SkeletonBodyHeaderSize = sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t),
+				
+				//(size_t)_JointType::JointType_Count * (sizeof(_Joint) + sizeof(_JointOrientation) + sizeof(ofVec2f));
+				SkeletonJointSize = 1200,
+
 				SkeletonBodySize = SkeletonBodyHeaderSize + 20 * SkeletonJointSize,
 				SkeletonSize = SkeletonBodySize * 6 + 1,
 
