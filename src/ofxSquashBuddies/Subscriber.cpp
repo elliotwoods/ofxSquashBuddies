@@ -18,8 +18,9 @@ namespace ofxSquashBuddies {
 
 		try {
 			this->socket = make_unique<zmq::socket_t>(this->context, ZMQ_SUB);
-			int highWaterMark = 3000;
+			int highWaterMark = 500;
 			this->socket->setsockopt(ZMQ_RCVHWM, &highWaterMark, sizeof(highWaterMark)); 
+			this->socket->setsockopt(ZMQ_RCVTIMEO, 500);
 			this->socket->connect("tcp://" + address + ":" + ofToString(port));
 			this->socket->setsockopt(ZMQ_SUBSCRIBE, "", 0);
 		}
@@ -223,18 +224,28 @@ namespace ofxSquashBuddies {
 	//---------
 	void Subscriber::socketLoop() {
 		while (this->threadsRunning) {
-			if (this->socket) {
-				auto dataGram = make_shared<ofxAsio::DataGram>();
-				auto & message = dataGram->getMessage();
+			try {
+				if (this->socket) {
+					auto dataGram = make_shared<ofxAsio::DataGram>();
+					auto & message = dataGram->getMessage();
 
-				message.resize(Packet::PacketAllocationSize * 2);
-				auto receivedSize = this->socket->recv(message.data(), message.size(), ZMQ_DONTWAIT);
-				if (receivedSize > 0) {
-					this->frameBuffers.socketToFrameBuffers.send(dataGram);
+					message.resize(Packet::PacketAllocationSize * 2);
+					auto receivedSize = this->socket->recv(message.data(), message.size());
+					if (receivedSize == EAGAIN) {
+						//timeout
+						continue;
+					}
+
+					if (receivedSize > 0) {
+						this->frameBuffers.socketToFrameBuffers.send(dataGram);
+					}
+				}
+				else {
+					OFXSQUASHBUDDIES_WARNING << "Socket not connected, cannot receive packets.";
 				}
 			}
-			else {
-				OFXSQUASHBUDDIES_WARNING << "Socket not connected, cannot receive packets.";
+			catch (...) {
+				OFXSQUASHBUDDIES_ERROR << "Exception thrown in socket loop";
 			}
 		}
 	}

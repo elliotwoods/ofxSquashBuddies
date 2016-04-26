@@ -14,7 +14,7 @@ struct Packet {
 	//constants
 	enum {
 		DefaultPacketSize = 4 * 1024,
-		PacketAllocationSize = 9000,
+		PacketAllocationSize = DefaultPacketSize * 2,
 		HeaderSize = sizeof(Header),
 		MaxPayloadSize = PacketAllocationSize - HeaderSize
 	};
