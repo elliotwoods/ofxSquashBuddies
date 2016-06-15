@@ -185,6 +185,7 @@
     <ClCompile Include="..\src\ofxSquashBuddies\Receiver.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\Sender.cpp" />
     <ClCompile Include="..\src\ofxSquashBuddies\ThingsInCommon.cpp" />
+    <ClCompile Include="..\src\ofxSquashBuddies\Utils.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
   </ItemGroup>
@@ -197,6 +198,8 @@
     <ClInclude Include="..\src\ofxSquashBuddies\Receiver.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\Sender.h" />
     <ClInclude Include="..\src\ofxSquashBuddies\ThingsInCommon.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\ThreadChannel.h" />
+    <ClInclude Include="..\src\ofxSquashBuddies\Utils.h" />
     <ClInclude Include="src\ofApp.h" />
   </ItemGroup>
   <ItemGroup>
