@@ -17,6 +17,9 @@ namespace ofxSquashBuddies {
 		void init(string ipAddress, int port);
 		void close();
 		
+		const string & getAddress() const;
+		int getPort() const;
+
 		void setCodec(const ofxSquash::Codec &) override;
 		const ofxSquash::Codec & getCodec() const override;
 
@@ -46,6 +49,9 @@ namespace ofxSquashBuddies {
 	protected:
 		void compressLoop();
 		void socketLoop();
+
+		string address;
+		int port;
 
 		ofxSquash::Codec codec;
 

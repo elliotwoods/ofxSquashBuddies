@@ -27,6 +27,9 @@ namespace ofxSquashBuddies {
 			this->config.endPoint = ofxAsio::UDP::EndPoint(ipAddress, port);
 		}
 
+		this->address = ipAddress;
+		this->port = port;
+
 		this->threadsRunning = true;
 		this->compressThread = thread([this]() {
 			this->compressLoop();
@@ -54,11 +57,24 @@ namespace ofxSquashBuddies {
 			this->socketThread.join();
 		}
 
+		this->address = "";
+		this->port = -1;
+
 		this->appToCompressor.reset();
 		this->compressorToSocket.reset();
 	}
 
 	//----------
+	const string & Sender::getAddress() const {
+		return this->address;
+	}
+	
+	//---------
+	int Sender::getPort() const {
+		return this->port;
+	}
+	
+	//---------
 	void Sender::setCodec(const ofxSquash::Codec & codec) {
 		this->codec = codec;
 	}
