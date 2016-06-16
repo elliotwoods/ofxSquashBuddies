@@ -38,3 +38,4 @@ ipch/
 
 # VVVV backup files
 *~.xml
+*.opendb
