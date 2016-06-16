@@ -4,6 +4,8 @@
 #include "FrameBuffer.h"
 #include "Utils.h"
 
+#include "ofxZmq.h"
+
 #include "ofThreadChannel.h"
 #include "ofEvent.h"
 

@@ -7,8 +7,6 @@
 #include "ofxSquash/Codec.h"
 #include "ofxSquash/Stream.h"
 
-#include "ofxZmq.h"
-
 #include <condition_variable>
 #include <thread>
 

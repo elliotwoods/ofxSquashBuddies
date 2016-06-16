@@ -22,7 +22,7 @@
     <ProjectGuid>{7FD42DF7-442E-479A-BA76-D0022F99702A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>exampleReceive</RootNamespace>
-    <ProjectName>exampleReceivePixels</ProjectName>
+    <ProjectName>exampleSubscribePixels</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -51,34 +51,22 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksRelease.props" />
-    <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
-    <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
     <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
-    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksRelease.props" />
-    <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
-    <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
     <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
-    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksDebug.props" />
-    <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
-    <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
     <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
-    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksDebug.props" />
-    <Import Project="..\..\..\addons\ofxSquash\ofxSquashLib\ofxSquash.props" />
-    <Import Project="..\..\..\addons\ofxAsio\ofxAsioLib\ofxAsio.props" />
     <Import Project="..\ofxSquashBuddiesLib\ofxSquashBuddies.props" />
-    <Import Project="..\..\ofxZmq\ofxZmqLib\ofxZmq.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
