@@ -53,7 +53,7 @@ namespace ofxSquashBuddies {
 		int port = 0;
 		shared_ptr<ofxAsio::UDP::Server> socket;
 
-		FrameBufferSet frameBuffers;
+		FrameBufferSetUDP frameBuffers;
 
 		thread frameReceiverThread; //consumes decompressorToFrameReceiver
 		void frameReceiverLoop();

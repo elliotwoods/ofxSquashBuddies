@@ -26,18 +26,6 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	void FrameBuffer::setCodec(const ofxSquash::Codec & codec) {
-		this->codec = codec;
-
-		this->stream = make_unique<ofxSquash::Stream>(this->codec, ofxSquash::Decompress);
-		this->stream->setWriteFunction([this](const ofxSquash::WriteFunctionArguments & args) {
-			this->writeFunction(args);
-		});
-
-		this->clear();
-	}
-
-	//---------
 	void FrameBuffer::setFrameIndex(uint32_t frameIndex) {
 		this->frameIndex = frameIndex;
 	}
@@ -75,7 +63,57 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	void FrameBuffer::clear() {
+	void FrameBuffer::decompressLoop() {
+		while (this->threadsRunning) {
+			Packet packet;
+			if (this->packetsToDecompressor.receive(packet)) {
+				if (!this->codec.isValid()) {
+					OFXSQUASHBUDDIES_ERROR << "Codec [" << this->codec.getName() << "] is not valid. Are you sure you have the plugins installed correctly?";
+					continue;
+				}
+
+				auto lock = unique_lock<mutex>(this->streamMutex);
+
+				this->stream->read((const void*)packet.payload, packet.header.payloadSize);
+
+				if (packet.header.isLastPacket)
+				{
+					(*this->stream) << ofxSquash::Stream::Finish();
+					lock.unlock(); //unlock the stream
+
+					this->decompressorToFrameReceiver.send(this->message);
+
+					this->success = true;
+					this->clear();
+				}
+			}
+		}
+	}
+
+	//---------
+	void FrameBuffer::writeFunction(const ofxSquash::WriteFunctionArguments & args) {
+		this->message.pushData(args.data, args.size);
+	}
+
+#pragma mark FrameBufferTCP
+	//---------
+	FrameBufferTCP::FrameBufferTCP(ThreadChannel<Message> & decompressorToFrameReceiver) : FrameBuffer(decompressorToFrameReceiver) {
+	}
+
+	//---------
+	void FrameBufferTCP::setCodec(const ofxSquash::Codec & codec) {
+		this->codec = codec;
+
+		this->stream = make_unique<ofxSquash::Stream>(this->codec, ofxSquash::Decompress);
+		this->stream->setWriteFunction([this](const ofxSquash::WriteFunctionArguments & args) {
+			this->writeFunction(args);
+		});
+
+		this->clear();
+	}
+	
+	//---------
+	void FrameBufferTCP::clear() {
 		{
 			auto lock = unique_lock<mutex>(this->packetsMutex);
 
@@ -129,57 +167,71 @@ namespace ofxSquashBuddies {
 		this->frameIndex = 0;
 	}
 
+#pragma mark FrameBufferUDP
 	//---------
-	void FrameBuffer::decompressLoop() {
-		while (this->threadsRunning) {
-			Packet packet;
-			if (this->packetsToDecompressor.receive(packet)) {
-				if (!this->codec.isValid()) {
-					OFXSQUASHBUDDIES_ERROR << "Codec [" << this->codec.getName() << "] is not valid. Are you sure you have the plugins installed correctly?";
-					continue;
-				}
+	FrameBufferUDP::FrameBufferUDP(ThreadChannel<Message> & decompressorToFrameReceiver) : FrameBuffer(decompressorToFrameReceiver) {
+	}
 
-				auto lock = unique_lock<mutex>(this->streamMutex);
+	//---------
+	void FrameBufferUDP::setCodec(const ofxSquash::Codec & codec) {
+		this->codec = codec;
 
-				this->stream->read((const void*)packet.payload, packet.header.payloadSize);
-
-				if (packet.header.isLastPacket)
-				{
-					(* this->stream) << ofxSquash::Stream::Finish();
-					lock.unlock(); //unlock the stream
-
-					this->decompressorToFrameReceiver.send(this->message);
-
-					this->success = true;
-					this->clear();
-				}
-			}
+		if (this->packetIndexPosition == 0) {
+			//reset if we haven't started processing packets yet
+			this->clear();
 		}
 	}
 
 	//---------
-	void FrameBuffer::writeFunction(const ofxSquash::WriteFunctionArguments & args) {
-		this->message.pushData(args.data, args.size);
+	void FrameBufferUDP::clear() {
+		{
+			auto lock = unique_lock<mutex>(this->packetsMutex);
+
+			if (!this->packets.empty()) {
+				//We cleared before all our packets were processed
+				auto lastPacket = max<uint16_t>(this->packetIndexPosition, this->packets.rbegin()->first);
+				size_t droppedPackets = 0;
+				for (int i = 0; i < lastPacket; i++) {
+					auto findPacket = this->packets.find(i);
+					if (findPacket == this->packets.end() && i >= this->packetIndexPosition) {
+						droppedPackets++;
+					}
+				}
+
+				//send a DroppedFrame back up the chain
+				DroppedFrame droppedFrame = {
+					DroppedFrame::DroppedPackets,
+					droppedPackets,
+					lastPacket
+				};
+				onDroppedFrame.notify(this, droppedFrame);
+			}
+
+			this->packets.clear();
+			this->packetIndexPosition = 0;
+		}
+
+		{
+			auto lock = unique_lock<mutex>(this->messageMutex);
+			this->message.clear();
+		}
+
+		{
+			auto lock = unique_lock<mutex>(this->streamMutex);
+
+			this->stream = make_unique<ofxSquash::Stream>(this->codec, ofxSquash::Decompress);
+			this->stream->setWriteFunction([this](const ofxSquash::WriteFunctionArguments & args) {
+				this->writeFunction(args);
+			});
+		}
+
+		this->frameIndex = 0;
 	}
 
 #pragma mark FrameBufferSet
 	//---------
-	FrameBufferSet::FrameBufferSet() {
-		for (int i = 0; i < 2; i++) {
-			auto frameBuffer = make_shared<FrameBuffer>(this->decompressorToFrameReceiver);
-			this->frameBuffers.emplace_back(frameBuffer);
-			frameBuffer->onDroppedFrame.add(this, &FrameBufferSet::callbackDroppedFrame, 0);
-		}
-
-		this->dataGramProcessorThread = thread([this]() {
-			this->dataGramProcessorLoop();
-		});
-	}
-
-	//---------
 	FrameBufferSet::~FrameBufferSet() {
 		this->threadRunning = false;
-		this->socketToFrameBuffers.close();
 		if (this->dataGramProcessorThread.joinable()) {
 			this->dataGramProcessorThread.join();
 		}
@@ -193,17 +245,69 @@ namespace ofxSquashBuddies {
 	}
 
 	//---------
-	FrameBuffer & FrameBufferSet::getFrameBuffer(uint32_t frameIndex) {
+	bool FrameBufferSet::isExpired(uint32_t frameIndex) const {
+		// this function is called by the datagram processor, to throw away any packets early on which are irrelevant
+		// (will be associated with some sort of dropped packet)
+
+		for (auto frameBuffer : this->frameBuffers) {
+			if (frameBuffer->getFrameIndex() == frameIndex) {
+				return false;
+			}
+		}
+
+		auto currentMinFrameIndex = numeric_limits<uint32_t>::max();
+		for (auto frameBuffer : this->frameBuffers) {
+			if (frameBuffer->getFrameIndex() < currentMinFrameIndex) {
+				currentMinFrameIndex = frameBuffer->getFrameIndex();
+			}
+		}
+
+		if (frameIndex < currentMinFrameIndex) {
+			//we're skipping backwards
+			if (frameIndex + OFXSQUASHBUDDIES_MAX_FRAME_DISCONTINUITY > currentMinFrameIndex) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	//---------
+	const vector<shared_ptr<FrameBuffer>> & FrameBufferSet::getFrameBuffers() const {
+		return this->frameBuffers;
+	}
+
+#pragma mark FrameBufferSetTCP
+	//---------
+	FrameBufferSetTCP::FrameBufferSetTCP() {
+		for (int i = 0; i < 2; i++) {
+			auto frameBuffer = make_shared<FrameBufferTCP>(this->decompressorToFrameReceiver);
+			this->frameBuffers.emplace_back(frameBuffer);
+			frameBuffer->onDroppedFrame.add(this, &FrameBufferSetTCP::callbackDroppedFrame, 0);
+		}
+
+		this->dataGramProcessorThread = thread([this]() {
+			this->dataGramProcessorLoop();
+		});
+	}
+
+	//---------
+	FrameBufferSetTCP::~FrameBufferSetTCP() {
+		this->socketToFrameBuffers.close();
+	}
+
+	//---------
+	FrameBuffer & FrameBufferSetTCP::getFrameBuffer(uint32_t frameIndex) {
 		//this function is called by the datagram processor to provide a useful frame buffer
 		// for this frameIndex. Note, that it's not the responsibility of this function
 		// to determine if the frameIndex should be assigned a frameBuffer.
 		// That's handled by isExpired earlier in execution.
 
 		// Also note : FrameBuffers will clear themselves when correctly processed
-		
+
 		for (const auto & frameBuffer : this->frameBuffers) {
 			if (frameBuffer->getFrameIndex() == frameIndex) {
-				return * frameBuffer;
+				return *frameBuffer;
 			}
 		}
 
@@ -212,7 +316,7 @@ namespace ofxSquashBuddies {
 		//	1. We've skipped backwards
 		//	2. We're onto the next frame
 		//	3. We're skipping frames
-		
+
 
 
 
@@ -224,7 +328,7 @@ namespace ofxSquashBuddies {
 			if (frameBuffer->getFrameIndex() == 0) {
 				frameBuffer->setFrameIndex(frameIndex);
 				//this is a blank buffer, use this one
-				return * frameBuffer;
+				return *frameBuffer;
 			}
 		}
 		//
@@ -284,51 +388,18 @@ namespace ofxSquashBuddies {
 		//we clear the oldest frame and use that
 		earliestFrame->clear();
 		earliestFrame->setFrameIndex(frameIndex);
-		return * earliestFrame;
+		return *earliestFrame;
 		//
 		//--
 	}
 
 	//---------
-	bool FrameBufferSet::isExpired(uint32_t frameIndex) const {
-		// this function is called by the datagram processor, to throw away any packets early on which are irrelevant
-		// (will be associated with some sort of dropped packet)
-
-		for (auto frameBuffer : this->frameBuffers) {
-			if (frameBuffer->getFrameIndex() == frameIndex) {
-				return false;
-			}
-		}
-
-		auto currentMinFrameIndex = numeric_limits<uint32_t>::max();
-		for (auto frameBuffer : this->frameBuffers) {
-			if (frameBuffer->getFrameIndex() < currentMinFrameIndex) {
-				currentMinFrameIndex = frameBuffer->getFrameIndex();
-			}
-		}
-
-		if (frameIndex < currentMinFrameIndex) {
-			//we're skipping backwards
-			if (frameIndex + OFXSQUASHBUDDIES_MAX_FRAME_DISCONTINUITY > currentMinFrameIndex) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	//----------
-	const vector<shared_ptr<FrameBuffer>> & FrameBufferSet::getFrameBuffers() const {
-		return this->frameBuffers;
-	}
-
-	//---------
-	void FrameBufferSet::callbackDroppedFrame(DroppedFrame & droppedFrame) {
+	void FrameBufferSetTCP::callbackDroppedFrame(DroppedFrame & droppedFrame) {
 		this->droppedFrames.send(droppedFrame);
 	}
 
 	//---------
-	void FrameBufferSet::dataGramProcessorLoop() {
+	void FrameBufferSetTCP::dataGramProcessorLoop() {
 		while (this->threadRunning) {
 			shared_ptr<ofxAsio::DataGram> dataGram;
 			while (this->socketToFrameBuffers.receive(dataGram)) {
@@ -341,7 +412,90 @@ namespace ofxSquashBuddies {
 				if (this->isExpired(packet.header.frameIndex)) {
 					continue;
 				}
-				
+
+				auto & frameBuffer = this->getFrameBuffer(packet.header.frameIndex);
+				frameBuffer.add(packet);
+			}
+		}
+	}
+
+#pragma mark FrameBufferSetUDP
+	//---------
+	FrameBufferSetUDP::FrameBufferSetUDP() {
+		for (int i = 0; i < 3; i++) {
+			auto frameBuffer = make_shared<FrameBufferUDP>(this->decompressorToFrameReceiver);
+			this->frameBuffers.emplace_back(frameBuffer);
+			frameBuffer->onDroppedFrame.add(this, &FrameBufferSetUDP::callbackDroppedFrame, 0);
+		}
+
+		this->dataGramProcessorThread = thread([this]() {
+			this->dataGramProcessorLoop();
+		});
+	}
+
+	//---------
+	FrameBufferSetUDP::~FrameBufferSetUDP() {
+		this->socketToFrameBuffers.close();
+	}
+
+	//---------
+	FrameBuffer & FrameBufferSetUDP::getFrameBuffer(uint32_t frameIndex) {
+		for (auto & frameBuffer : this->frameBuffers) {
+			if (frameBuffer->getFrameIndex() == frameIndex) {
+				return *frameBuffer;
+			}
+		}
+
+		//if we got to here, we didn't have one matching
+		auto maxDistance = 0;
+		auto minDistance = numeric_limits<int>::max();
+		shared_ptr<FrameBuffer> furthest, closest;
+		for (auto & frameBuffer : this->frameBuffers) {
+			auto distance = abs((int)frameBuffer->getFrameIndex() - (int)frameIndex);
+			if (distance > maxDistance) {
+				maxDistance = distance;
+				furthest = frameBuffer;
+			}
+			if (distance < minDistance) {
+				minDistance = distance;
+				closest = frameBuffer;
+			}
+		}
+
+		//notify dropped frames if we're going forwards
+		if (minDistance < OFXSQUASHBUDDIES_MAX_FRAME_DISCONTINUITY && closest->getFrameIndex() < frameIndex) {
+			DroppedFrame droppedFrame = {
+				DroppedFrame::Reason::SkippedFrame,
+				0,
+				0
+			};
+			this->droppedFrames.send(droppedFrame);
+		}
+		furthest->clear();
+		furthest->setFrameIndex(frameIndex);
+		return *furthest;
+	}
+
+	//---------
+	void FrameBufferSetUDP::callbackDroppedFrame(DroppedFrame & droppedFrame) {
+		this->droppedFrames.send(droppedFrame);
+	}
+
+	//---------
+	void FrameBufferSetUDP::dataGramProcessorLoop() {
+		while (this->threadRunning) {
+			shared_ptr<ofxAsio::UDP::DataGram> dataGram;
+			while (this->socketToFrameBuffers.receive(dataGram)) {
+				auto & message = dataGram->getMessage();
+				if (message.empty()) {
+					continue;
+				}
+				Packet packet(message);
+
+				if (this->isExpired(packet.header.frameIndex)) {
+					continue;
+				}
+
 				auto & frameBuffer = this->getFrameBuffer(packet.header.frameIndex);
 				frameBuffer.add(packet);
 			}

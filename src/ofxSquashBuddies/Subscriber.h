@@ -58,7 +58,7 @@ namespace ofxSquashBuddies {
 		zmq::context_t context;
 		shared_ptr<zmq::socket_t> socket;
 
-		FrameBufferSet frameBuffers;
+		FrameBufferSetTCP frameBuffers;
 
 		thread frameReceiverThread; //consumes decompressorToFrameReceiver
 		void frameReceiverLoop();

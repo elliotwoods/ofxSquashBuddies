@@ -35,13 +35,13 @@ namespace ofxSquashBuddies {
 		FrameBuffer(ThreadChannel<Message> &);
 		~FrameBuffer();
 
-		void setCodec(const ofxSquash::Codec &);
+		virtual void setCodec(const ofxSquash::Codec &) = 0;
 
 		void setFrameIndex(uint32_t);
 		uint32_t getFrameIndex() const;
 
 		void add(const Packet &);
-		void clear();
+		virtual void clear() {};
 
 		ofEvent<DroppedFrame> onDroppedFrame;
 
@@ -72,27 +72,77 @@ namespace ofxSquashBuddies {
 		uint32_t frameIndex = 0;
 	};
 
+	class FrameBufferTCP : public FrameBuffer {
+	public:
+		FrameBufferTCP(ThreadChannel<Message> &);
+		virtual void setCodec(const ofxSquash::Codec &) override;
+
+		virtual void clear() override;
+
+	protected:
+	};
+
+	class FrameBufferUDP : public FrameBuffer {
+	public:
+		FrameBufferUDP(ThreadChannel<Message> &);
+		virtual void setCodec(const ofxSquash::Codec &) override;
+
+		virtual void clear() override;
+
+	protected:
+	};
+
 	class FrameBufferSet {
 	public:
-		FrameBufferSet();
-		~FrameBufferSet();
+		virtual ~FrameBufferSet();
 
 		void setCodec(const ofxSquash::Codec &);
 
-		FrameBuffer & getFrameBuffer(uint32_t frameIndex);
+		virtual FrameBuffer & getFrameBuffer(uint32_t frameIndex) = 0;
+
 		bool isExpired(uint32_t frameIndex) const;
 
-		ofThreadChannel<shared_ptr<ofxAsio::DataGram>> socketToFrameBuffers;
 		ThreadChannel<Message> decompressorToFrameReceiver;
 		ofThreadChannel<DroppedFrame> droppedFrames;
 
 		const vector<shared_ptr<FrameBuffer>> & getFrameBuffers() const;
+
 	protected:
-		void callbackDroppedFrame(DroppedFrame &);
 		vector<shared_ptr<FrameBuffer>> frameBuffers;
 
 		thread dataGramProcessorThread; // consumes socketToFrameBuffers
-		void dataGramProcessorLoop();
 		bool threadRunning = true;
+
+		virtual void dataGramProcessorLoop() = 0;
+	};
+
+	class FrameBufferSetTCP : public FrameBufferSet {
+	public:
+		FrameBufferSetTCP();
+		~FrameBufferSetTCP();
+
+		virtual FrameBuffer & getFrameBuffer(uint32_t frameIndex) override;
+
+		ofThreadChannel<shared_ptr<ofxAsio::DataGram>> socketToFrameBuffers;
+
+	protected:
+		void callbackDroppedFrame(DroppedFrame &);
+
+		virtual void dataGramProcessorLoop() override;
+	};
+
+	class FrameBufferSetUDP : public FrameBufferSet {
+	public:
+		FrameBufferSetUDP();
+		~FrameBufferSetUDP();
+
+		virtual FrameBuffer & getFrameBuffer(uint32_t frameIndex) override;
+
+		ofThreadChannel<shared_ptr<ofxAsio::UDP::DataGram>> socketToFrameBuffers;
+
+	protected:
+		void callbackDroppedFrame(DroppedFrame &);
+
+		virtual void dataGramProcessorLoop() override;
 	};
 }
