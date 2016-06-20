@@ -98,6 +98,7 @@ namespace ofxSquashBuddies {
 #pragma mark FrameBufferTCP
 	//---------
 	FrameBufferTCP::FrameBufferTCP(ThreadChannel<Message> & decompressorToFrameReceiver) : FrameBuffer(decompressorToFrameReceiver) {
+		codec = ThingsInCommonTCP::getDefaultCodec();
 	}
 
 	//---------
@@ -170,6 +171,7 @@ namespace ofxSquashBuddies {
 #pragma mark FrameBufferUDP
 	//---------
 	FrameBufferUDP::FrameBufferUDP(ThreadChannel<Message> & decompressorToFrameReceiver) : FrameBuffer(decompressorToFrameReceiver) {
+		codec = ThingsInCommonUDP::getDefaultCodec();
 	}
 
 	//---------

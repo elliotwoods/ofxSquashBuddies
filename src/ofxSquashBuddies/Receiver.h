@@ -11,7 +11,7 @@
 
 #define OFXSQUASHBUDDIES_RECEIVETHREADCOUNT 3
 namespace ofxSquashBuddies {
-	class Receiver : public ThingsInCommon {
+	class Receiver : public ThingsInCommonUDP {
 	public:
 		Receiver();
 		~Receiver();

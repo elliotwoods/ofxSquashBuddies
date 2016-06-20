@@ -16,7 +16,16 @@ namespace ofxSquashBuddies {
 		virtual void setCodec(const ofxSquash::Codec &) = 0;
 		void setCodec(const string & codecName);
 		virtual const ofxSquash::Codec & getCodec() const = 0;
+	};
 
+	class ThingsInCommonTCP : public ThingsInCommon {
+	public:
 		static ofxSquash::Codec getDefaultCodec();
 	};
+
+	class ThingsInCommonUDP : public ThingsInCommon {
+	public:
+		static ofxSquash::Codec getDefaultCodec();
+	};
+
 }

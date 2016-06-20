@@ -11,7 +11,7 @@
 #include "ofMesh.h"
 
 namespace ofxSquashBuddies {
-	class Sender : public ThingsInCommon {
+	class Sender : public ThingsInCommonUDP {
 	public:
 		Sender();
 		~Sender();

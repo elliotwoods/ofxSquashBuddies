@@ -7,8 +7,14 @@ namespace ofxSquashBuddies {
 	}
 
 	//----------
-	ofxSquash::Codec ThingsInCommon::getDefaultCodec() {
+	ofxSquash::Codec ThingsInCommonTCP::getDefaultCodec() {
 		auto codec = ofxSquash::Codec("lz4");
+		return codec;
+	}
+
+	//----------
+	ofxSquash::Codec ThingsInCommonUDP::getDefaultCodec() {
+		auto codec = ofxSquash::Codec("density");
 		return codec;
 	}
 }

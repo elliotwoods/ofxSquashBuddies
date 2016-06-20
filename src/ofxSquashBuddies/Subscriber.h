@@ -10,7 +10,7 @@
 #include "ofEvent.h"
 
 namespace ofxSquashBuddies {
-	class Subscriber : public ThingsInCommon {
+	class Subscriber : public ThingsInCommonTCP {
 	public:
 		Subscriber();
 		~Subscriber();

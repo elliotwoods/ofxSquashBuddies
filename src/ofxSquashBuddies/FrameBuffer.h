@@ -48,7 +48,7 @@ namespace ofxSquashBuddies {
 	protected:
 		bool threadsRunning = true;
 
-		ofxSquash::Codec codec = ThingsInCommon::getDefaultCodec();
+		ofxSquash::Codec codec;
 
 		bool success = false;
 		int32_t packetIndexPosition = 0;

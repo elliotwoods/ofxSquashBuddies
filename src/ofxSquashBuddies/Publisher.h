@@ -11,7 +11,7 @@
 #include "ofMesh.h"
 
 namespace ofxSquashBuddies {
-	class Publisher : public ThingsInCommon {
+	class Publisher : public ThingsInCommonTCP {
 	public:
 		Publisher();
 		~Publisher();
