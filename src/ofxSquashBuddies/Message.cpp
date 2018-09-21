@@ -223,7 +223,7 @@ namespace ofxSquashBuddies {
 			ofPixelFormat pixelFormat = (ofPixelFormat)header.pixelFormat;
 
 			//reallocate if we need to
-			data.allocate(header.width, header.headerSize, pixelFormat);
+			data.allocate(header.width, header.height, pixelFormat);
 			if (data.size() * sizeof(uint16_t) != bodySize) {
 				OFXSQUASHBUDDIES_ERROR << "Message body is of wrong size to fill pixels. Maybe a bug in sender?";
 				return false;
