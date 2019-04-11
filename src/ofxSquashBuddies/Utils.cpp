@@ -1,5 +1,7 @@
 #include "Utils.h"
 
+using namespace std;
+
 namespace ofxSquashBuddies {
 	namespace Utils {
 		//----------
